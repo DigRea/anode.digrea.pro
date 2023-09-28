@@ -74,7 +74,7 @@ $ <span class="textcopy">cd ..</span></p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">LOAD (check_load)</span> &ndash; текущая загрузка системы;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">SWAP (check_swap)</span> &ndash; использование подкачки;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">APT (check_apt)</span> &ndash; мониторинг менеджера apt на нвличие обновлений системы.</p>
-<p>В следующей <a href="/pages/nagiosplug.php" class="textlink">статье</a> будет рассмотрено подключение дополнительных плагинов.</p>
+<p>В следующей <a href="/pages/nagplugs.php" class="textlink">статье</a> будет рассмотрено подключение дополнительных плагинов.</p>
 <p>Внесём изменения в файл конфигурации NRPE:</p>
 <div class="messtext">
 <p>$ <span class="textcopy">sudo nano /usr/local/nagios/etc/nrpe.cfg</span></p>
@@ -100,6 +100,7 @@ command[check_apt]=/usr/local/nagios/libexec/check_apt<br>
 <p>command[check_load]=/usr/local/nagios/libexec/check_load -r -w .3,.2,.1 -c .6,.5,.4</p>
 </div>
 <p>После презапуска сервиса NRPE (<span class="textcopy">sudo service nrpe restart</span>) настройку хоста можно считать законченной.</p>
+<p class="textwarn">Если хост находится в другой подсети, то на шлюзе между подсетями нужно пробрасывать порт <b>5666</b>, так как именно через этот порт работает сервис NRPE.</p>
 <p style="font-size: 1px">&nbsp;</p>
 <p class="contsubs">Настройка сервера</p>
 <p>Теперь пропишем хост на сервере мониторинга. Создадим файл хоста, например, <span class="textmark">webserv</span>:</p>
