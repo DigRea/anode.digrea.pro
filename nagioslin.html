@@ -73,8 +73,9 @@ $ <span class="textcopy">cd ..</span></p>
 <p>Из стандартного набора плагинов можно использовать следующие:</p>
 <p>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">LOAD (check_load)</span> &ndash; текущая загрузка системы;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">SWAP (check_swap)</span> &ndash; использование подкачки;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">APT (check_apt)</span> &ndash; мониторинг менеджера apt на нвличие обновлений.</p>
-<p>Теперь отредактируем файл конфигурации NRPE:</p>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">APT (check_apt)</span> &ndash; мониторинг менеджера apt на нвличие обновлений системы.</p>
+<p>В следующей <a href="/pages/nagiosplug.php" class="textlink">статье</a> будет рассмотрено подключение дополнительных плагинов.</p>
+<p>Внесём изменения в файл конфигурации NRPE:</p>
 <div class="messtext">
 <p>$ <span class="textcopy">sudo nano /usr/local/nagios/etc/nrpe.cfg</span></p>
 </div>
@@ -94,7 +95,7 @@ command[check_apt]=/usr/local/nagios/libexec/check_apt<br>
 <tr><td>6 Core</td><td>-w .90,.60,.30 -c 1.80,1.50,1.20</td></tr>
 <tr><td>8 Core</td><td>-w 1.20,.80,.40 -c 2.40,2.00,1.60</td></tr>
 </table></p>
-<p>Например, для двухядерного процессора:</p>
+<p>Например, для двухъядерного процессора:</p>
 <div class="messfile textcopy">
 <p>command[check_load]=/usr/local/nagios/libexec/check_load -r -w .3,.2,.1 -c .6,.5,.4</p>
 </div>
@@ -139,7 +140,7 @@ define service {<br>
 }<br><br>
 ...
 </div>
-<p>Для наглядного отображения зависимости серверов друг от друга в пункте меню <span class="textmark">Map (Legacy)</span> в секцию <span class="textmark">define host</span> можно добавить запись <span class="textmark">parents otherhost</span>, где <span class="textmark">otherhost</span> - сервер, являющийся "родителем" сервера <span class="textmark">webserv</span> (в данном случае).</p>
+<p>Для наглядного отображения зависимости серверов друг от друга (например, в пункте меню <span class="textmark">Map (Legacy)</span>) в секцию <span class="textmark">define host</span> можно добавить запись <span class="textmark">parents otherhost</span>, где <span class="textmark">otherhost</span> - сервер, являющийся "родителем" сервера <span class="textmark">webserv</span> (в данном случае).</p>
 <p>Ну и, как обычно, после любых изменений конфигурационных файлов следует перезапустить сервис Nagios:</p>
 <div class="messtext">
 <p>$ <span class="textcopy">sudo service nagios restart</span></p>
