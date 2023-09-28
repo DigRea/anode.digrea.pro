@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">Debian на Raspberry Pi 2</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Настройка Debian на Raspberry Pi 2.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Октябрь 2017.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>Август 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
+</div><br>
+<div class="conttext"><p class="contsubs">Запись образа и базовая настройка</p>
+<p>В этой статье рассматривается подробная настройка минимального дистрибутива Debian (9, 10, 11) на одноплатном компьютере Raspberry Pi 2. Архитектура операционной системы &ndash; <span class="textmark">armv7l</span>, архитектура пакетов &ndash; <span class="textmark">armhf</span>.</p>
+<p>Дистрибутив представляет собой img-образ, который записывается на карту microSD. Скачиваем нужную версию образа системы используя утилиту&nbsp;&nbsp;<span class="textmark">wget</span>.</p>
+<p>Для Debian 9 Stretch:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget srv_addr/storage/imgrpi/RPi2-Stretch.img</span></p>
+</div>
+<p>Для Debian 10 Buster:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget srv_addr/storage/imgrpi/RPi2-Buster.img</span></p>
+</div>
+<p>Для Debian 11 Bullseye:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget srv_addr/storage/imgrpi/RPi2-Bullseye.img</span></p>
+</div>
+<p>Далее нужно записать образ на SD-карту. Обычно SD-карта определяется в системе как&nbsp;&nbsp;<span class="textmark">mmcblk0</span>, что можно узнать при помощи команды&nbsp;&nbsp;<span class="textmark">fdisk</span>, выполненной с ключом&nbsp;&nbsp;<span class="textmark">- l</span> от имени суперпользователя.</p>
+<p>На примере дистрибутива Buster запишем образ на SD-карту:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo dd if=RPi2-Buster.img of=/dev/mmcblk0 bs=1M conv=fdatasync</span></p>
+</div>
+<p>При первом запуске необходимо произвести настройку системы (подключив к плате монитор, клавиатуру и вставив SD-карту). Логин и пароль по умолчанию &ndash; <span class="textmark">root</span> и <span class="textmark">debian</span> соответственно.</p>
+<p>Первым делом поменяем пароль командой&nbsp;&nbsp;<span class="textmark">passwd</span>. Далее настроим локали:</p>
+<div class="messtext">
+<p># <span class="textcopy">dpkg-reconfigure locales</span></p>
+</div>
+<p>Из списка выбираем <span class="textmark">en_US.UTF-8 UTF-8</span> и <span class="textmark">ru_RU.UTF-8 UTF-8</span>. Последнюю можно выбрать по умолчанию. Настроим часовой пояс:</p>
+<div class="messtext">
+<p># <span class="textcopy">dpkg-reconfigure tzdata</span></p>
+</div>
+<p>В данном случае выбираем <span class="textmark">Европа</span> и <span class="textmark">Москва</span>.</p>
+<p>Определяем сетевой интерфейс:</p>
+<div class="messtext">
+<p># <span class="textcopy">ifconfig -a</span></p>
+</div>
+<p class="textwarn">Если система не понимает данную команду, то следует установить пакет&nbsp;&nbsp;<b>net-tools</b>.</p>
+<p class="textwarn">Начиная с Debian 9 Stretch наименования сетевых интерфейсов на платах Raspberry Pi 2 имеют вид <b>enx{MAC-адрес}</b>.</p>
+<p>В соответствии с настройками сети добавляем параметры сетевого интерфейса в конфигурационный файл&nbsp;&nbsp;<span class="textmark textcopy">/etc/network/interfaces</span> (все параметры необходимо вбить вручную).</p>
+<p>В этом примере используются следующие параметры:</p>
+<div class="messfile textcopy"><p>
+# interfaces(5) file used by ifup(8) and ifdown(8)<br>
+# Include files from /etc/network/interfaces.d:<br>
+source-directory /etc/network/interfaces.d<br>
+<br>
+auto enxb827eb57057a<br>
+iface enxb827eb57057a inet static<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;address 10.0.0.220<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;netmask 255.255.255.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;network 10.0.0.0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gateway 10.0.0.1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;broadcast 10.0.0.255
+</p></div>
+<p>Указываем сервер DNS:</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /etc/systemd/resolved.conf</span></p>
+</div>
+<p>Раскомментируем последнюю строку и впишем ip-адрес DNS-сервера:</p>
+<div class="messfile textcopy"><p>
+# This file is part of systemd.<br>
+#<br>
+# systemd is free software; you can redistribute it and/or modify it<br>
+# under the terms of the GNU Lesser General Public License as published by<br>
+# the Free Software Foundation; either version 2.1 of the License, or<br>
+# (at your option) any later version.<br>
+#<br>
+# See resolved.conf(5) for details<br>
+<br>
+[Resolve]<br>
+DNS=10.0.0.10
+</p></div>
+<p>Меняем&nbsp;&nbsp;<span class="textmark">hostname</span> (просто вписываем имя в файл):</p>
+<div class="messtext">
+<p># <span class="textcopy">echo "<b>somehost</b>" > /etc/hostname</span></p>
+</div>
+<p>Далее приводим файл <span class="textmark">/etc/hosts</span> к следующему виду (добавляем <i>вторую</i> строку &ndash; под петлевым адресом):</p>
+<div class="messfile textcopy"><p>
+127.0.0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;localhost<br>
+10.0.0.220&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>somehost</b><br>
+<br>
+::1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;localhost ip6-localhost ip6-loopback<br>
+ff02::1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ip6-allnodes<br>
+ff02::2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ip6-allrouters
+</p></div>
+<p>Теперь после перезагрузки, можно заходить на хост посредством ssh.</p>
+<a name="rootresize"></a><p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Расширение корневого раздела</p>
+<p>Для определения названий разделов SD-карты воспользуемся командой&nbsp;&nbsp;<span class="textmark">fdisk -l</span>.</p>
+<p>При использовании карты ёмкостью 32 Gb получим вывод:</p>
+<div class="messview"><p>
+Disk /dev/mmcblk0: 29.3 GiB, 31457280000 bytes, 61440000 sectors<br>
+Units: sectors of 1 * 512 = 512 bytes<br>
+Sector size (logical/physical): 512 bytes / 512 bytes<br>
+I/O size (minimum/optimal): 512 bytes / 512 bytes<br>
+Disklabel type: dos<br>
+Disk identifier: 0xc96ffe28<br>
+<br>
+Device&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Boot&nbsp;&nbsp;Start&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;End Sectors&nbsp;&nbsp;Size Id Type<br>
+/dev/mmcblk0p1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2048&nbsp;&nbsp;249855&nbsp;&nbsp;247808&nbsp;&nbsp;121M&nbsp;&nbsp;e&nbsp;W95 FAT16 (LBA)<br>
+/dev/mmcblk0p2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;249856 6291455 6041600&nbsp;&nbsp;2.9G 83 Linux
+</p></div>
+<p>Запускаем&nbsp;&nbsp;<span class="textmark">fdisk</span>:</p>
+<div class="messtext">
+<p># <span class="textcopy">fdisk /dev/mmcblk0</span></p>
+</div>
+<p>Для отображения таблицы разделов выполним команду&nbsp;&nbsp;<span class="textmark">p</span>:</p>
+<div class="messview"><p>
+Welcome to fdisk (util-linux 2.25.2).<br>
+Changes will remain in memory only, until you decide to write them.<br>
+Be careful before using the write command.<br>
+<br>
+Command (m for help): p<br>
+Disk /dev/mmcblk0: 29.3 GiB, 31457280000 bytes, 61440000 sectors<br>
+Units: sectors of 1 * 512 = 512 bytes<br>
+Sector size (logical/physical): 512 bytes / 512 bytes<br>
+I/O size (minimum/optimal): 512 bytes / 512 bytes<br>
+Disklabel type: dos<br>
+Disk identifier: 0xc96ffe28<br>
+<br>
+Device&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Boot&nbsp;&nbsp;Start&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;End Sectors&nbsp;&nbsp;Size Id Type<br>
+/dev/mmcblk0p1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2048&nbsp;&nbsp;249855&nbsp;&nbsp;247808&nbsp;&nbsp;121M&nbsp;&nbsp;e&nbsp;W95 FAT16 (LBA)<br>
+/dev/mmcblk0p2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;249856 6291455 6041600&nbsp;&nbsp;2.9G 83 Linux<br>
+<br>
+Command (m for help):
+</p></div>
+<p>Из вывода команды видно, что размер SD-карты 29.3 GiB, а размер основного раздела (раздел 2) всего 2.9G. Расширим этот раздел на всё оставшееся свободное пространство SD-карты. Сначала командой <span class="textmark">d</span> удалим раздел (номер раздела &ndash; <span class="textmark">2</span>), затем создадим новый командой <span class="textmark">n</span> (<span class="textmark">p</span> &ndash; основной раздел, номер раздела &ndash; <span class="textmark">2</span>). Начальный и конечный сектора оставляем по умолчанию:</p>
+<div class="messview"><p>
+Command (m for help): d<br>
+Partition number (1,2, default 2): 2<br>
+<br>
+Partition 2 has been deleted.<br>
+<br>
+Command (m for help): n<br>
+Partition type<br>
+&nbsp;&nbsp;&nbsp;p&nbsp;&nbsp;&nbsp;primary (1 primary, 0 extended, 3 free)<br>
+&nbsp;&nbsp;&nbsp;e&nbsp;&nbsp;&nbsp;extended (container for logical partitions)<br>
+Select (default p): p<br>
+Partition number (2-4, default 2): 2<br>
+First sector (249856-61439999, default 249856):<br>
+Last sector, +sectors or +size{K,M,G,T,P} (249856-61439999, default 61439999):<br>
+<br>
+Created a new partition 2 of type ''Linux'' and of size 29.2 GiB.<br>
+<br>
+Command (m for help):
+</p></div>
+<p>Теперь таблица разделов выглядит так (введём команду <span class="textmark">p</span>):</p>
+<div class="messview"><p>
+Command (m for help): p<br>
+Disk /dev/mmcblk0: 29.3 GiB, 31457280000 bytes, 61440000 sectors<br>
+Units: sectors of 1 * 512 = 512 bytes<br>
+Sector size (logical/physical): 512 bytes / 512 bytes<br>
+I/O size (minimum/optimal): 512 bytes / 512 bytes<br>
+Disklabel type: dos<br>
+Disk identifier: 0xc96ffe28<br>
+<br>
+Device&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Boot&nbsp;&nbsp;Start&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;End&nbsp;&nbsp;Sectors&nbsp;&nbsp;&nbsp;Size Id Type<br>
+/dev/mmcblk0p1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;2048&nbsp;&nbsp;&nbsp;249855&nbsp;&nbsp;&nbsp;247808&nbsp;&nbsp;&nbsp;121M&nbsp;&nbsp;e&nbsp;W95 FAT16 (LBA)<br>
+/dev/mmcblk0p2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;249856 61439999 61190144&nbsp;&nbsp;29.2G 83 Linux<br>
+<br>
+Command (m for help):
+</p></div>
+<p>Далее командой&nbsp;&nbsp;<span class="textmark">w</span> запишем изменения и выйдем из программы.</p>
+<p class="textwarn">После этого получим предупреждение, что устройство подмонтировано и суперблок недоступен, и что объём раздела будет изменён после перезапуска ОС.</p>
+<p>Перезагружаем систему:</p>
+<div class="messtext">
+<p># <span class="textcopy">reboot</span></p>
+</div>
+<p>Теперь необходимо расширить файловую систему на весь новый раздел:</p>
+<div class="messtext">
+<p># <span class="textcopy">resize2fs /dev/mmcblk0p2</span></p>
+</div>
+<p>Удостоверимся, что файловая система теперь занимает весь объём раздела &ndash; <span class="textmark">df -h</span>:</p>
+<div class="messview"><p>
+Filesystem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Size&nbsp;&nbsp;Used Avail Use% Mounted on<br>
+/dev/root&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;29G&nbsp;&nbsp;476M&nbsp;&nbsp;&nbsp;28G&nbsp;&nbsp;&nbsp;2% /<br>
+devtmpfs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;459M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;459M&nbsp;&nbsp;&nbsp;0% /dev<br>
+tmpfs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;463M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;463M&nbsp;&nbsp;&nbsp;0% /dev/shm<br>
+tmpfs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;463M&nbsp;&nbsp;284K&nbsp;&nbsp;463M&nbsp;&nbsp;&nbsp;1% /run<br>
+tmpfs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5.0M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;5.0M&nbsp;&nbsp;&nbsp;0% /run/lock<br>
+tmpfs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;463M&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;463M&nbsp;&nbsp;&nbsp;0% /sys/fs/cgroup<br>
+/dev/mmcblk0p1&nbsp;&nbsp;121M&nbsp;&nbsp;&nbsp;11M&nbsp;&nbsp;111M&nbsp;&nbsp;&nbsp;9% /boot/firmware
+</p></div><br>
+<a name="swapfile"></a><p class="contsubs">Создание SWAP-файла</p>
+<p>Т.к. раздела подкачки ещё нет, создадим swap-файл:</p>
+<div class="messtext">
+<p># <span class="textcopy">dd if=/dev/zero of=/swapfile bs=1<b>M</b> count=1024</span></p>
+</div>
+<p>Здесь используются суффиксы K, M, G для килобайт, мегабайт и гигабайт соответственно. В данном примере создаётся файл размером 1024 Мегабайт.</p>
+<p>Назначаем права:</p>
+<div class="messtext">
+<p># <span class="textcopy">chmod 600 /swapfile</span></p>
+</div>
+<p>Определяем созданный файл как файл подкачки:</p>
+<div class="messtext">
+<p># <span class="textcopy">mkswap /swapfile</span></p>
+</div>
+<p>И подключаем swap-файл в систему:</p>
+<div class="messtext">
+<p># <span class="textcopy">swapon /swapfile</span></p>
+</div>
+<p>Для автоматического подключения swap-файла при загрузке системы прописываем его в&nbsp;&nbsp;<span class="textmark textcopy">/etc/fstab</span> путём добавления в конец файла строки следующего содержания:</p>
+<div class="messfile">
+<p class="textcopy">/swapfile none swap sw 0 0</p>
+</div>
+<p>Проверить наличие свопинга можно так:</p>
+<div class="messtext">
+<p># <span class="textcopy">swapon -s</span></p>
+</div>
+<p>Далее обновляем систему:</p>
+<div class="messtext">
+<p># <span class="textcopy">apt-get update && apt-get upgrade</span></p>
+</div>
+<p>И, по желанию, ставим необходимые пакеты:</p>
+<div class="messtext">
+<p># <span class="textcopy">apt-get install sudo aptitude mc bash-completion htop exfat-utils ca-certificates \<br>
+lsb-release ntp usbutils dkms python unzip</span></p>
+</div>
+<p>На этом базовую настройку системы можно считать выполненной.</p>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

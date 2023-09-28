@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">MacPorts. Установка на macOS</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>MacPorts. Установка и примеры использования на macOS.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Апрель 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
+</div><br>
+<div class="conttext">
+<p><span class="textmark">MacPorts</span> &ndash; система для установки программного обеспечения, распространяемого в исходных кодах, для операционной системы macOS; включает в себя как приложения с командным интерфейсом, так и программы с графическим интерфейсом пользователя (X11 или Aqua). MacPorts распространяется под лицензией BSD и имеет командный интерфейс пользователя.</p>
+<p>При помощи этой системы можно установить множество полезных консольных утилит, вроде <span class="textmark">nmap</span>, <span class="textmark">mc</span>, <span class="textmark">nano</span>, <span class="textmark">wget</span> и т.п. Для установки <span class="textmark">MacPorts</span> необходимо предварительно установить <span class="textmark">Xcode</span> и <span class="textmark">Xcode Command Line Tools</span>, версии которых соответствуют версии системы macOS:</p>
+<p><table style="width: 400px; text-indent: 20px;">
+<tr style="color: white;"><td>версия macOS</td><td>версия Xcode</td><td>дата релиза</td></tr>
+<tr><td></td><td></td><td></td></tr>
+<tr><td>macOS 10.10.5</td><td>Xcode 7.2</td><td>08.12.2015</td></tr>
+<tr><td>macOS 10.11.5</td><td>Xcode 8.2.1</td><td>19.12.2016</td></tr>
+<tr><td>macOS 10.12.6</td><td>Xcode 9.2</td><td>04.12.2017</td></tr>
+<tr><td>macOS 10.13.6</td><td>Xcode 10.1</td><td>30.10.2018</td></tr>
+<tr><td>macOS 10.14.4</td><td>Xcode 11.3.1</td><td>13.01.2020</td></tr>
+<tr><td>macOS 10.15.4</td><td>Xcode 12.4</td><td>26.01.2021</td></tr>
+<tr><td>macOS 11.3</td><td>Xcode 13.2.1</td><td>17.12.2021</td></tr>
+<tr><td>macOS 12.0</td><td>Xcode 13.3</td><td>14.03.2022</td></tr>
+</table></p>
+<p>На мой взгляд самым правильным способом установки является установка из пакета, который можно скачать с сайта&nbsp;&nbsp;<a class="textlink" target="_blank" href="https://xcodereleases.com">https://xcodereleases.com</a>&nbsp;&nbsp;(необходимо будет ввести Apple ID).</p>
+<p>После установки <span class="textmark">Xcode</span> следует установить <span class="textmark">Xcode Command Line Tools</span>. Для этого набираем в терминале следующую команду:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">xcode-select --install</span></p>
+</div>
+<p>Появится панель с подтверждением установки (нажимаем <span class="textmark">Install</span>).</p>
+<p>А теперь скачиваем и устанавливаем пакет <span class="textmark">MacPorts</span> (который соответствует версии системы macOS) с сайта&nbsp;&nbsp;<a class="textlink" target="_blank" href="https://www.macports.org">https://www.macports.org</a>.</p>
+<a name="macports"></a><p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Примеры использования</p>
+<p>Вывод списка доступных портов:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">port list</span></p>
+</div>
+<p>Поиск необходимой программы:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">port search nano</span></p>
+</div>
+<p>Просмотр описания порта:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">port info nano</span></p>
+</div>
+<p>Компиляция и установка программы:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo port install nano</span></p>
+</div>
+<p>Обновление дерева портов:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo port -v selfupdate</span></p>
+</div>
+<p>Обновление установленных портов:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo port upgrade outdated</span></p>
+</div>
+<p>Вывод списка портов, которые зависят от nmap:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">port dependents nmap</span></p>
+</div>
+<p>Удаление установленного порта:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo port uninstall nano</span></p>
+</div>
+<p class="textwarn">Некоторые порты могут зависеть от сервера <b>X11</b> (он же <b>X Window System</b> &ndash; оконная система, обеспечивающая стандартные инструменты и протоколы для построения графического интерфейса пользователя). В этом случае следует установить пакет <b>XQuartz</b> с сайта&nbsp;&nbsp;<a class="textlink" target="_blank" href="https://www.xquartz.org">https://www.xquartz.org</a>.</p>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

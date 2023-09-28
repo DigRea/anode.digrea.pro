@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">Установка Asterisk 13 на Debian</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Установка Asterisk 13 с Web-GUI на Debian 8 Jessie.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Январь 2019.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>Июль 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p></div><br>
+<div class="conttext">
+<p><span class="textmark">Asterisk</span> &ndash; свободное решение компьютерной телефонии (в том числе, VoIP) с открытым исходным кодом от компании Digium. В комплексе с необходимым оборудованием Asterisk обладает всеми возможностями классической АТС, поддерживает множество VoIP-протоколов и предоставляет богатые функции управления звонками.</p>
+<p>Ставим необходимые зависимости:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt-get install build-essential autoconf libtool libncurses5-dev libssl-dev \<br>
+libxml2-dev libsqlite3-dev libmysqlclient-dev curl mpg123 libxml2 uuid-dev lame \<br>
+libaudiofile-dev subversion sox libsox-fmt-all libjansson-dev libiksemel-dev \<br>
+libtiff5-dev mysql-client libmyodbc linux-headers-''uname -r'' mysql-server \<br>
+mysql-client</span>
+</p></div>
+<p>В процессе установки нужно будет задать пароль пользователя&nbsp;&nbsp;<span class="textmark">root</span> в MySQL.</p>
+<p>Запустим и включим сервис MySQL:</p>
+<div class="messtext"><p>
+# <span class="textcopy">/etc/init.d/mysql restart</span><br>
+# <span class="textcopy">systemctl enable mysql</span>
+</p></div>
+<p>Далее следует установить PJSIP, DAHDI, LibPRI и SpanDSP.</p>
+<p><span class="textmark">PJSIP</span> &ndash; инструмент для работы с SIP-протоколом.<br>
+<span class="textmark">DAHDI</span> &ndash; драйверы для плат производства Digium.<br>
+<span class="textmark">LibPRI</span> &ndash; библиотека, предназначенная для работы с потоковыми TDM-интерфейсами ISDN: PRI (Primary Rate Interface) и BRI (Basic Rate Interface).<br>
+<span class="textmark">SpanDSP</span> &ndash; библиотека для цифровой обработки сигналов (DSP). DSP используется для преобразования изображений в аудио и обратно. В Asterisk требуется для отправки и получения факсов.</p>
+<p>Устанавливаем PJSIP (pjproject):</p>
+<div class="messtext"><p>
+# <span class="textcopy">wget http://www.pjsip.org/release/2.4.5/pjproject-2.4.5.tar.bz2</span><br>
+# <span class="textcopy">tar -xjvf pjproject-*.tar.bz2</span><br>
+# <span class="textcopy">cd pjproject-*</span><br>
+# <span class="textcopy">CFLAGS=''-DPJ_HAS_IPV6=1'' ./configure --enable-shared --disable-sound \<br>
+--disable-resample --disable-video --disable-opencore-amr</span><br>
+# <span class="textcopy">make dep && make && make install</span><br>
+# <span class="textcopy">cd ..</span>
+</p></div>
+<p>Устанавливаем DAHDI:</p>
+<div class="messtext"><p>
+# <span class="textcopy">wget http://downloads.asterisk.org/pub/telephony/\<br>
+dahdi-linux-complete/dahdi-linux-complete-current.tar.gz</span><br>
+# <span class="textcopy">tar xvfz dahdi-linux-complete-current.tar.gz</span><br>
+# <span class="textcopy">cd dahdi-linux-complete-*</span><br>
+# <span class="textcopy">make all && make install && make config</span><br>
+# <span class="textcopy">cd ..</span>
+</p></div>
+<p>Устанавливаем LibRPI:</p>
+<div class="messtext"><p>
+# <span class="textcopy">wget http://downloads.asterisk.org/pub/telephony/libpri/libpri-current.tar.gz</span><br>
+# <span class="textcopy">tar xvfz libpri-current.tar.gz</span><br>
+# <span class="textcopy">cd libpri-*</span><br>
+# <span class="textcopy">make && make install</span><br>
+# <span class="textcopy">cd ..</span>
+</p></div>
+<p>Устанавливаем SpanDSP:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt-get install libspandsp2 libspandsp-dev</span>
+</p></div>
+<p>Теперь ставим Asterisk (необходимые модули устанавливаем командой&nbsp;&nbsp;<span class="textmark">make menuselect</span>):</p>
+<div class="messtext"><p>
+# <span class="textcopy">wget http://downloads.asterisk.org/pub/telephony/asterisk/\<br>
+asterisk-13-current.tar.gz</span><br>
+# <span class="textcopy">tar xvfz asterisk-13-current.tar.gz</span><br>
+# <span class="textcopy">cd asterisk-13*</span><br>
+# <span class="textcopy">contrib/scripts/get_mp3_source.sh</span><br>
+# <span class="textcopy">contrib/scripts/install_prereq install</span><br>
+# <span class="textcopy">./configure</span><br>
+# <span class="textcopy">make menuselect</span>
+</p></div>
+<p>Устанавливаем следующие модули:</p>
+<p><span class="textmark">Add-ons: format_mp3.</span> Если планируется использовать связку с mysql и собирать детализированный отчет вызовов (cdr), то следует добавить <span class="textmark">res_config_mysql, app_myql, cdr_mysql</span>.<br>
+<span class="textmark">Core Sound Packages: CORE-SOUNDS-EN-(GSM), CORE-SOUNDS-RU-(GSM), CORE-SOUNDS-EN-(WAV),<br>
+<span style="color: transparent">Core Sound Packages: </span>CORE-SOUNDS-RU-(WAV)</span>.<br>
+<span class="textmark">Extras Sound Packages: EXTRA-SOUNDS-EN-GSM, EXTRA-SOUNDS-EN-WAV</span>.</p>
+<p>Далее:</p>
+<div class="messtext"><p>
+# <span class="textcopy">make && make install && make config && make samples && ldconfig</span><br>
+# <span class="textcopy">cd ..</span>
+</p></div>
+<p>Русский язык по умолчанию:</p>
+<div class="messtext"><p>
+# <span class="textcopy">sed -i ''s/defaultlanguage = en/defaultlanguage = ru/'' \<br>
+/etc/asterisk/asterisk.conf</span><br>
+# <span class="textcopy">sed -i ''s/;language=en/language=ru/'' /etc/asterisk/*.conf</span>
+</p></div>
+<p>Создаём пользователя и даем права:</p>
+<div class="messtext"><p>
+# <span class="textcopy">adduser --system --group --home /var/lib/asterisk \<br>
+--no-create-home --gecos "Asterisk PBX" asterisk</span><br>
+# <span class="textcopy">chown -R asterisk:asterisk /var/lib/asterisk/ /var/log/asterisk/ \<br>
+/var/run/asterisk/ /var/spool/asterisk/ /etc/asterisk</span>
+</p></div>
+<p>В файле&nbsp;&nbsp;<span class="textmark textcopy">/etc/default/asterisk</span> раскомментируем две строки:</p>
+<div class="messfile textcopy"><p>
+AST_USER="asterisk"<br>
+AST_GROUP="dialout"
+</p></div>
+<p>И запускаем Asterisk:</p>
+<div class="messtext"><p>
+# <span class="textcopy">service asterisk start</span>
+</p></div><br>
+<a name="astergui"></a><p class="contsubs">Web-GUI для Asterisk</p>
+<p>Установим GUI от разработчиков Asterisk (компании Digium):</p>
+<div class="messtext"><p>
+# <span class="textcopy">svn export http://svn.digium.com/svn/asterisk-gui/branches/2.0/ asterisk-gui</span><br>
+# <span class="textcopy">cd ~/asterisk-gui/</span><br>
+# <span class="textcopy">./configure</span><br>
+# <span class="textcopy">make install</span>
+</p></div>
+<p>Отредактируем файл&nbsp;&nbsp;<span class="textmark textcopy">/etc/asterisk/manager.conf</span> (создадим пользователя&nbsp;&nbsp;<span class="textmark">admin</span> с паролем&nbsp;&nbsp;<span class="textmark">password</span>):</p>
+<div class="messfile textcopy"><p>
+[general]<br>
+enabled = yes<br>
+port = 5036<br>
+webenabled = yes<br>
+<br>
+[<b>admin</b>]<br>
+secret = <b>password</b><br>
+read = system,call,log,verbose,command,agent,user,config<br>
+write = system,call,log,verbose,command,agent,user,config,originate
+</p></div>
+<p>Далее, в файле&nbsp;&nbsp;<span class="textmark textcopy">/etc/asterisk/http.conf</span> настраиваем хост web-сервера:</p>
+<div class="messfile textcopy"><p>
+[general]<br>
+enabled = yes<br>
+bindaddr = 0.0.0.0<br>
+bindport = 8088<br>
+enablestatic = yes<br>
+redirect = / /static/config/cfgbasic.html<br>
+writeaccess = yes<br>
+<br>
+[post_mappings]<br>
+backups = /var/lib/asterisk/gui_backups<br>
+moh = /var/lib/asterisk/moh<br>
+</p></div>
+<p>Проверяем конфигурацию и запускаем Asterisk:</p>
+<div class="messtext"><p>
+# <span class="textcopy">make checkconfig</span><br>
+# <span class="textcopy">/etc/init.d/asterisk start</span><br>
+# <span class="textcopy">cd ..</span>
+</p></div>
+<p>Смотрим, работает ли служба на порту 8088:</p>
+<div class="messtext"><p>
+# <span class="textcopy">netstat -nltp</span>
+</p></div>
+<p>Вывод:</p>
+<div class="messview"><p>
+Active Internet connections (only servers)<br>
+Proto&nbsp;Recv-Q&nbsp;Send-Q&nbsp;Local Address&nbsp;&nbsp;&nbsp;Foreign Address&nbsp;&nbsp;State&nbsp;&nbsp;&nbsp;PID/Program name<br>
+tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;127.0.0.1:3306&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN&nbsp;&nbsp;9595/mysqld<br>
+tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0.0.0.0:5036&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN&nbsp;&nbsp;28894/asterisk<br>
+tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0.0.0.0:2000&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN&nbsp;&nbsp;28894/asterisk<br>
+tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0.0.0.0:22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN&nbsp;&nbsp;434/sshd<br>
+tcp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;0.0.0.0:8088&nbsp;&nbsp;&nbsp;&nbsp;0.0.0.0:*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN&nbsp;&nbsp;28894/asterisk<br>
+tcp6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0 :::22&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:::*&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;LISTEN&nbsp;&nbsp;434/sshd
+</p></div>
+<p>Теперь можно зайти на web-интерфейс:&nbsp;&nbsp;<span class="textmark textcopy">http://<b>ip-address</b>:8088/static/config/index.html</span>.</p>
+<p>Если после удачного входа в систему появляется сообщение "Checking write permission for gui folder" и больше ничего не происходит, то нужно снова дать права:</p>
+<div class="messtext"><p>
+# <span class="textcopy">chown -R asterisk:asterisk /var/lib/asterisk/ /var/log/asterisk/ \<br>
+/var/run/asterisk/ /var/spool/asterisk/ /etc/asterisk</span>
+</p></div>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">APCUPSd. Мониторинг ИБП</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Установка и настройка APCUPSd на Debian для мониторинга ИБП.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Май 2018.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>Июль 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p></div><br>
+<div class="conttext">
+<p><span class="textmark">APCUPSd (APC UPS Daemon)</span> &ndash; пакет программ для управления ИБП фирмы APC. В состав этого пакета также входят программы <span class="textmark">apctest</span> (настройка и калибровка ИБП) и <span class="textmark">apcaccess</span> (отображение текущей информации об ИБП).</p>
+<p>В этой статье будет рассмотрен мониторинг ИБП APC Back-UPS 650 с помощью демона <span class="textmark">apcupsd</span> с целью заблаговременного выключения хоста при низком заряде аккумулятора ИБП.</p>
+<p class="textwarn">ИБП должен быть подключён к хосту с помощью USB-кабеля типа A/B.</p>
+<p>Начнём с установки <span class="textmark">apcupsd</span>:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo apt-get install apcupsd</span>
+</p></div>
+<p>Отредактируем конфигурационный файл:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo nano /etc/apcupsd/apcupsd.conf</span>
+</p></div>
+<p>Здесь интересны три параметра:</p>
+<p><span class="textmark">UPSCABLE</span> &ndash; тип кабеля, которым UPS подключён к ПК. В комментариях указаны возможные типы подключения (simple, smart, ether, usb). В данном случае указываем <span class="textmark">usb</span>.
+<br><span class="textmark">UPSTYPE</span> &ndash; здесь указывается тип подключённого UPS. В комментариях перечислены возможные типы и соответствующие им значения параметра <span class="textmark">DEVICE</span>. Также указываем <span class="textmark">usb</span>.
+<br><span class="textmark">DEVICE</span> &ndash; закомментируем эту строку, поставив перед ней знак <span class="textmark">#</span> (для usb-устройств этот параметр не важен).</p>
+<p>Далее открываем следующий файл:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo nano /etc/default/apcupsd</span>
+</p></div>
+<p>И меняем <span class="textmark">ISCONFIGURED=no</span> на <span class="textmark">ISCONFIGURED=yes</span>.</p>
+<p>Запускаем <span class="textmark">apcupsd</span>:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo /etc/init.d/apcupsd start</span>
+</p></div>
+<p>А теперь более подробно о настройках в файле <span class="textmark textcopy">/etc/apcupsd/apcupsd.conf</span>:</p>
+<p><span class="textmark">ONBATTERYDELAY</span> &ndash; время (в секундах), которое определяет задержку между обнаружением сбоя электропитания и отсылкой события <span class="textmark">onbattery</span>. По умолчанию &ndash; 6.
+<br><span class="textmark">BATTERYLEVEL</span> &ndash; уровень заряда батареи (в процентах), при котором инициируется выключение компьютера. По умолчанию &ndash; 5.
+<br><span class="textmark">MINUTES</span> &ndash; расчётное время остаточной работы (в минутах), при достижении которого инициируется выключение компьютера. По умолчанию &ndash; 3.
+<br><span class="textmark">TIMEOUT</span> &ndash; параметр актуален для старых ИБП, неспособных определять свой уровень заряда. Задаёт время (в секундах) между сбоем электропитания и отключением компьютера. Для современного ИБП параметр стоит оставить на 0, но выставление иного значения может быть удобно для тестирования работы ИБП. Например, если выставить 30 и выдернуть шнур из розетки, уже через полминуты <span class="textmark">apcupsd</span> продемонстрирует своё умение выключать компьютер.</p>
+<p>Выполнения одного из условий (BATTERYLEVEL, MINUTES или TIMEOUT) достаточно для выключения компьютера.</p>
+<p class="textwarn">Для запуска программ <b>apctest</b> или <b>apcaccess</b> сначала необходимо остановить сервис <b>apcupsd</b>.</p>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

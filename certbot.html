@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">Certbot. Создание SSL-сертификата</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Создание SSL-сертификата Let''s Encrypt при помощи клиента Certbot.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Апрель 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p></div><br><div class="conttext">
+<p><span class="textmark">Let''s Encrypt</span> &ndash; это центр сертификации, который предоставляет бесплатные криптографические сертификаты X.509 для шифрования передаваемых через интернет данных HTTPS и других протоколов, используемых серверами в Интернет. При помощи программного клиента <span class="textmark">Certbot</span> этот процесс максимально автоматизирован.</p>
+<p>В этой статье в качестве примера будет использоваться доменное имя&nbsp;&nbsp;<span class="textmark">example.com</span>. Здесь следует отметить, что данное имя должно быть зарегистрировано любым регистратором доменов, а также в настройках ресурсных записей домена должны быть добавлены следующие DNS-записи:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;Запись A, где&nbsp;&nbsp;<span class="textmark">example.com</span> указывает на публичный IP-адрес сервера.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;Запись CNAME, где&nbsp;&nbsp;<span class="textmark">www</span> (по сути &ndash; поддомен) указывает на доменное имя&nbsp;&nbsp;<span class="textmark">example.com</span>.</p>
+<p class="textwarn">Ниже будут рассмотрены процедуры создания сертификатов для web-серверов Nginx и Apache. Здесь каждый сам решает, какой из них использовать.<p>
+<p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Установка и настройка Nginx</p>
+<p>Установим web-сервер Nginx, Certbot и плагин для Nginx:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt install nginx certbot python3-certbot-nginx</span></p>
+</div>
+<p>Далее создадим серверный блок для домена&nbsp;&nbsp;<span class="textmark">example.com</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /etc/nginx/sites-available/example.com</span></p>
+</div>
+<p>В данный файл необходимо внести следующую минимальную конструкцию:</p>
+<div class="messfile textcopy">
+<p>server {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;server_name example.com www.example.com;<br>
+}</p>
+</div>
+<p>Проверяем правильность настройки конфигурационного файла:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nginx -t</span></p>
+</div>
+<p>Вывод должен быть следующим:</p>
+<div class="messview">
+<p>nginx: the configuration file /etc/nginx/nginx.conf syntax is ok<br>
+nginx: configuration file /etc/nginx/nginx.conf test is successful
+</p></div>
+<p>Перезапускаем сервис:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl reload nginx</span></p>
+</div><br>
+<p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Установка и настройка Apache</p>
+<p>Добавляем репозиторий:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo add-apt-repository ppa:certbot/certbot</span></p>
+</div>
+<p>Установим Apache и Certbot:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt install apache2 python-certbot-apache</span></p>
+</div>
+<p>Далее создадим виртуальный хост для домена&nbsp;&nbsp;<span class="textmark">example.com</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /etc/apache2/sites-available/example.com.conf</span></p>
+</div>
+<p>В данный файл вносим следующую минимальную конструкцию:</p>
+<div class="messfile textcopy">
+<p>&lt;VirtualHost *:80&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ServerName example.com;<br>
+&lt;/VirtualHost&gt;</p></div>
+<p>Проверяем корректность настройки конфигурационного файла:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apache2ctl configtest</span></p>
+</div>
+<p>Вывод должен быть следующим:</p>
+<div class="messview">
+<p>Syntax OK
+</p></div>
+<p>Перезапускаем сервис:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl reload apache2</span></p>
+</div><br>
+<p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Получение SSL-сертификата</p>
+<p>В зависимости от используемого web-сервера, запускаем Certbot с соответствующим ключом.</p>
+<p>Для&nbsp;&nbsp;<span class="textmark">Nginx</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo certbot --nginx -d example.com -d www.example.com</span></p>
+</div>
+<p>Для&nbsp;&nbsp;<span class="textmark">Apache</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo certbot --apache -d example.com -d www.example.com</span></p>
+</div>
+<p>Далее Certbot запросит предпочитаемый вариант настройки:</p>
+<div class="messview">
+<p>Please choose whether or not to redirect HTTP traffic to HTTPS, removing HTTP access.<br>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -<br>
+1: No redirect &ndash; Make no further changes to the webserver configuration.<br>
+2: Redirect &ndash; Make all requests redirect to secure HTTPS access. Choose this for<br>
+new sites, or if you''re confident your site works on HTTPS. You can undo this<br>
+change by editing your web server''s configuration.<br>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -<br>
+Select the appropriate number [1-2] then [enter] (press ''c'' to cancel):<br>
+</p></div>
+<p>После выбора желаемого варианта, конфигурация будет обновлена, а web-сервер перезагрузится.</p>
+<p>Сертификаты&nbsp;&nbsp;<span class="textmark">Let''s Encrypt</span> действительны только в течение 90 дней. Certbot выполняет обновление сертификатов автоматически, добавляя таймер&nbsp;&nbsp;<span class="textmark">systemd</span>, который будет запускаться два раза в день и продлевать все сертификаты, истекающиее менее, чем через 30 дней.</p>
+<p>Статус таймера можно запросить с помощью следующей команды:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl status certbot.timer</span></p>
+</div>
+<p>Вывод:</p>
+<div class="messview">
+<p>● certbot.timer - Run certbot twice daily<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Loaded: loaded (/lib/systemd/system/certbot.timer; enabled; vendor preset: enabled)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Active: active (waiting) since Tue 2021-07-13 20:29:28 MSK; 9 months 12 days ago<br>
+&nbsp;&nbsp;&nbsp;Trigger: Mon 2022-04-25 22:31:36 MSK; 2h 54min left<br>
+&nbsp;&nbsp;Triggers: ● certbot.service<br>
+</p></div>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

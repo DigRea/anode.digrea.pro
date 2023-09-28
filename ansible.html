@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">Ansible. Установка и настройка</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Ansible. Установка и настройка на Debian 11 Bullseye.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Июнь 2023.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p></div><br>
+<div class="conttext">
+<p><span class="textmark">Ansible</span> &ndash; система управления конфигурациями, написанная на языке программирования Python, с использованием декларативного языка разметки для описания конфигураций. Применяется для автоматизации настройки и развёртывания программного обеспечения. Обычно используется для управления Linux-узлами. Поддерживает работу с сетевыми устройствами, на которых установлен Python версии 2.4 и выше по SSH-соединению.</p>
+<p>Прежде, чем начать установку, необходимо открыть доступ по ssh пользователю root к хостам, которые будут управляться при помощи Ansible. Для этого на каждом хосте следует отредактировать файл конфигурации ssh:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo nano /etc/ssh/sshd_config</span>
+</p></div>
+<p>Находим строку <span class="textmark">#PermitRootLogin prohibit-password</span> и приводим её к следующему виду:</p>
+<div class="messfile"><p>
+<span class="textcopy">PermitRootLogin yes</span>
+</p></div><br>
+<p class="contsubs">Установка и настройка Ansible</p>
+<p>Далее все настройки будут проводиться на хосте управления. Первым делом создадим ssh-ключи:</p>
+<div class="messtext"><p>
+# <span class="textcopy">ssh-keygen -t rsa</span>
+</p></div>
+<p>Нажимаем три раза Enter и генерируем ключи.</p>
+<p>Теперь скопируем ключи на хосты (здесь и далее используются ip-адреса <span class="textmark">10.10.10.21</span> и <span class="textmark">10.10.10.22</span> для хостов, которыми будем управлять):</p>
+<div class="messtext"><p>
+# <span class="textcopy">ssh-copy-id root@10.10.10.21</span><br>
+# <span class="textcopy">ssh-copy-id root@10.10.10.22</span>
+</p></div>
+<p>Обновляем систему и устанавливаем зависимости:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt update</span><br>
+# <span class="textcopy">apt upgrade</span><br>
+# <span class="textcopy">apt install gnupg2 curl wget</span>
+</p></div>
+<p>Добавляем репозиторий:</p>
+<div class="messtext"><p>
+# <span class="textcopy">echo "deb http://ppa.launchpad.net/ansible/ansible/ubuntu focal main" >> \<br>
+/etc/apt/sources.list</span>
+</p></div>
+<p>Импортируем ключ репозитория:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367</span>
+</p></div>
+<p>Устанавливаем <span class="textmark">Ansible</span>:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt update</span><br>
+# <span class="textcopy">apt install ansible</span>
+</p></div>
+<p>Далее создадим группу и пропишем хосты:</p>
+<div class="messtext"><p>
+# <span class="textcopy">nano /etc/ansible/hosts</span>
+</p></div>
+<p>Пример содержимого файла:</p>
+<div class="messfile"><p>
+<span class="textcopy">[webservers]</span><br>
+<span class="textcopy">10.10.10.21</span><br>
+<span class="textcopy">10.10.10.22</span>
+</p></div>
+<p>Вот, собственно, и всё. Теперь можно отдавать команды группе хостов:</p>
+<div class="messtext"><p>
+# <span class="textcopy">ansible -m shell -a "aptitude full-upgrade -y" webservers</span>
+</p></div>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

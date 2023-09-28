@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">DHCP-сервер isc-dhcp-server</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Установка и настройка DHCP-сервера isc-dhcp-server.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Февраль 2017.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>Март 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
+</div><br>
+<div class="conttext">
+<p><span class="textmark">ISC-DHCP-SERVER</span> &ndash; это DHCP-сервер от американской компании <b>Internet Systems Consortium</b>.<br>Конфигурация сервера хранится в двух основных файлах: статическая &ndash; в файле <span class="textcopy textmark">/etc/dhcp/dhcpd.conf</span>, а динамическая &ndash; в файле <span class="textcopy textmark">/var/lib/dhcp/dhcpd.leases</span>&nbsp;.</p>
+<p>Установим пакет DHCP-сервера (установка производится на ОС семейства Debian):</p>
+<div class="messtext">
+<p># <span class="textcopy">aptitude install isc-dhcp-server</span></p>
+</div>
+<p>В качестве примера будем использовать следующую подсеть: <span class="textmark">10.0.0.0/24</span>. Для начала, укажем на каком интерфейсе будет работать DHCP-сервер:</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /etc/default/isc-dhcp-server</span></p>
+</div>
+<p>В строке&nbsp;&nbsp;<span class="textmark">INTERFACES</span> указываем интерфейс, который смотрит в локальныю сеть (в случае нескольких интерфейсов, они указываются через пробел). В данном случае &ndash; это&nbsp;&nbsp;<span class="textmark">eth0</span>:</p>
+<div class="messfile">
+<p>INTERFACES="eth0"</p>
+</div>
+<p>Теперь настроим конфигурационный файл:</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /etc/dhcp/dhcpd.conf</span></p>
+</div>
+<p>В этом примере DHCP-сервер будет единственным в сети, поэтому снимаем комментарий со строки:</p>
+<div class="messfile">
+<p>authoritative;</p>
+</div>
+<p>Выставляем время аренды адресов, например, 7 дней (время выставляется в секундах):</p>
+<div class="messfile textcopy">
+<p>default-lease-time 604800;<br>
+max-lease-time 604800;</p>
+</div>
+<p>Теперь добавим подсеть. Диапазон ip-адресов, выдаваемых DHCP-сервером, назначим следующим: 10.0.0.100 &ndash; 10.0.0.254, маска подсети &ndash; 255.255.255.0 (она же 24). Шлюз &ndash; 10.0.0.1, DNS &ndash; 10.0.0.10:</p>
+<div class="messfile textcopy"><p>
+subnet 10.0.0.0 netmask 255.255.255.0 {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;range 10.0.0.100 10.0.0.254;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;option domain-name-servers 10.0.0.10;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;option domain-name "domain.local";<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;option routers 10.0.0.1;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;option broadcast-address 10.0.0.255;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+</p></div>
+<p>Перезапускаем сервер:</p>
+<div class="messtext">
+<p># <span class="textcopy">/etc/init.d/isc-dhcp-server restart</span></p>
+</div>
+<p class="textwarn">Чтобы зарезервировать ip-адрес для определённого хоста по MAC-адресу, нужно добавить следующую запись в файл&nbsp;&nbsp;<span class="textcopy"><b>/etc/dhcp/dhcpd.conf</b></span>:</p>
+<div class="messfile textcopy"><p>
+host <b>hostname</b> {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hardware ethernet 00:00:00:00:00:00;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fixed-address 10.0.0.110;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}
+</p></div>
+<p>Здесь&nbsp;&nbsp;<span class="textmark">00:00:00:00:00:00</span> &ndash; это MAC-адрес сетевой карты хоста&nbsp;&nbsp;<span class="textmark">hostname</span>, которому непосредственно и присваивается ip-адрес&nbsp;&nbsp;<span class="textmark">10.0.0.110</span>.</p>
+<p>Просмотреть активную аренду ip-адресов можно следующей командой:</p>
+<div class="messtext">
+<p># <span class="textcopy">cat /var/lib/dhcp/dhcpd.leases</span></p>
+</div>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

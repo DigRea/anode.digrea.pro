@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">XWiki. Установка на Debian 10</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Установка и настройка XWiki на Debian 10 Buster.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Май 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
+</div><br>
+<div class="conttext">
+<p><span class="textmark">XWiki</span> &ndash; это Вики-движок второго поколения, который характеризуются возможностью структуризации информации и программного доступа к базе вики. Написан на языке Java, лицензия распространения LGPL, функциональность включает в себя блог, инструменты API, комментарии, аутентификацию по LDAP, экспорт страниц в PDF.<p>
+<p>Итак, импортируем ключ и добавляем репозиторий:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo wget https://maven.xwiki.org/xwiki-keyring.gpg \<br>
+-O /usr/share/keyrings/xwiki-keyring.gpg</span><br>
+$ <span class="textcopy">sudo wget "https://maven.xwiki.org/stable/xwiki-stable.list" \<br>
+-O /etc/apt/sources.list.d/xwiki-stable.list</span></p>
+</div>
+<p>Обновляем репозиторий:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-get update</span></p>
+</div>
+<p>Далее устанавливаем XWiki с учётом предпочитаемой БД:</p>
+<p>MySQL:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-get install xwiki-tomcat9-mysql</span></p>
+</div>
+<p>MariaDB:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-get install xwiki-tomcat9-mariadb</span></p>
+</div>
+<p>PostgreSQL:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-get install xwiki-tomcat9-pgsql</span></p>
+</div>
+<p>По умолчанию в настройках Tomcat выделено слишком мало памяти для нормальной работы XWiki, поэтому добавим следующую строку в файл&nbsp;&nbsp;<span class="textcopy textmark">/etc/default/tomcat9</span>:</p>
+<div class="messfile">
+<p class="textcopy">JAVA_OPTS="-Djava.awt.headless=true -Xmx1024m"</p>
+</div>
+<p class="textwarn">Для подключения к web-интерфейсу XWiki используется порт 8080, а также добавляется /xwiki к URL. По некоторым причинам это может быть неудобно, поэтому далее рассмотрим вариант использования сокращённого адреса и стандартного 80-го порта.</p>
+<p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Использование сокращённого URL-адреса</p>
+<p>Сначала переименуем следующий файл:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo mv /etc/tomcat9/Catalina/localhost/xwiki.xml \<br>
+/etc/tomcat9/Catalina/localhost/ROOT.xml</span></p>
+</div>
+<p>В следующем файле необходимо внести изменения в блок&nbsp;&nbsp;<span class="textmark">Content XML</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /etc/xwiki/xwiki-tomcat9.xml</span></p>
+</div>
+<p>Здесь следует заменить значение&nbsp;&nbsp;<span class="textmark">/xwiki</span> на&nbsp;&nbsp;<span class="textmark">/</span> :</p>
+<div class="messfile">
+<p class="textcopy">&lt;Context path="<b>/</b>" docBase="/usr/lib/xwiki"&nbsp;&nbsp;&nbsp;...</p>
+</div>
+<p>Далее в файле&nbsp;&nbsp;<span class="textmark textcopy">/etc/xwiki/xwiki.cfg</span> нужно снять комментарий со строки&nbsp;&nbsp;<span class="textmark textcopy">xwiki.webapppath=</span> .</p>
+<p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Переключение на 80-й порт</p>
+<p>В конфигурационном файле&nbsp;&nbsp;<span class="textmark">tomcat</span> в блоке&nbsp;&nbsp;<span class="textmark textcopy">Connector</span> изменим значение порта&nbsp;&nbsp;<span class="textmark">8080</span> на&nbsp;&nbsp;<span class="textmark">80</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /etc/tomcat9/server.xml</span></p>
+</div>
+<p></p>
+<div class="messfile">
+<p class="textcopy">&lt;Connector port="<b>80</b>" protocol="HTTP/1.1"&nbsp;&nbsp;&nbsp;...</p>
+</div>
+<p>После перезагрузки на web-интерфейс XWiki можно зайти просто по ip-адресу.</p>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

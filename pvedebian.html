@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">Proxmox VE. Установка на Debian 11</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Установка Proxmox VE на Debian 11 Bullseye. Утилита qemu-img.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Май 2022.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>Октябрь 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
+</div><br>
+<div class="conttext">
+<p><span class="textmark">Proxmox Virtual Environment (Proxmox VE)</span> &ndash; система виртуализации с открытым исходным кодом, основанная на Debian GNU/Linux. Разрабатывается австрийской фирмой Proxmox Server Solutions GmbH, спонсируемой Internet Foundation Austria.</p>
+<p>В качестве гипервизоров использует KVM и LXC (начиная с версии 4.0, в версиях до 3.4 включительно вместо последнего использовался OpenVZ).</p>
+<p>Перед тем, как начать установку, проверим файл&nbsp;&nbsp;<span class="textmark textcopy">/etc/hosts</span>:</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /etc/hosts</span></p>
+</div>
+<p>Во <i>второй</i> строке не должно быть петлевого адреса. Если же там <span class="textmark">127.0.0.1</span>, то, вероятнее всего, при установке системы использовался DHCP-сервер для настройки сетевого интерфейса. Приведём запись к следующему виду (в данном примере для сетевого интерфейса используется адрес <span class="textmark">192.168.1.10</span>):</p>
+<div class="messfile textcopy"><p>
+127.0.0.1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;localhost<br>
+192.168.1.10&nbsp;&nbsp;&nbsp;&nbsp;hostname.proxmox.com&nbsp;&nbsp;hostname<br>
+<br>
+# The following lines are desirable for IPv6 capable hosts<br>
+::1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;localhost ip6-localhost ip6-loopback<br>
+ff02::1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ip6-allnodes<br>
+ff02::2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ip6-allrouters
+</p></div>
+<p>Добавляем репозиторий Proxmox VE:</p>
+<div class="messtext">
+<p># <span class="textcopy">echo "deb [arch=amd64] http://download.proxmox.com/debian/pve bullseye \<br>pve-no-subscription" > /etc/apt/sources.list.d/pve-install-repo.list</span></p>
+</div>
+<p>Импортируем ключ репозитория:</p>
+<div class="messtext">
+<p># <span class="textcopy">wget https://enterprise.proxmox.com/debian/proxmox-release-bullseye.gpg -O \<br>
+/etc/apt/trusted.gpg.d/proxmox-release-bullseye.gpg </span></p>
+</div>
+<p>Обновляем репозитории и систему:</p>
+<div class="messtext">
+<p># <span class="textcopy">apt update && apt full-upgrade</span></p>
+</div>
+<p>Ставим пакеты Proxmox VE::</p>
+<div class="messtext">
+<p># <span class="textcopy">apt install proxmox-ve postfix open-iscsi</span></p>
+</div>
+<p>После перезагрузки ядро PVE в GRUB будет выбрано по умолчанию. Теперь web-интерфейс Proxmox VE доступен по адресу:&nbsp;&nbsp;<span class="textmark">https://192.168.1.10:8006</span></p>
+<p>Далее следует удалить пакет <span class="textmark">os-prober</span>, чтобы избежать возможного <a href="https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=788062" class="textlink" target="_blank">повреджения файловых систем<a> виртуальных машин:</p>
+<div class="messtext">
+<p># <span class="textcopy">apt-get remove os-prober</span></p>
+</div>
+<p>При необходимости, можно удалить ядро Debian (заменено на ядро PVE):</p>
+<div class="messtext">
+<p># <span class="textcopy">apt remove linux-image-amd64 ''linux-image-5.10*''</span></p>
+</div>
+<p>И обновить GRUB:</p>
+<div class="messtext">
+<p># <span class="textcopy">update-grub</span></p>
+</div>
+<p class="textwarn">Чтобы в дальнейшем система не выдавала сообщение об ошибке обновления, необходимо удалить файл репозитория&nbsp;&nbsp;<span class="textcopy">/etc/apt/sources.list.d/pve-enterprise.list</span>&nbsp;&nbsp;(или закомментировать его содержимое).</p>
+<a name="qemu-img"></a><p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Утилита qemu-img для работы с образами дисков виртуальных машин</p>
+<p>Утилита&nbsp;&nbsp;<span class="textmark">qemu-img</span> &ndash; инструмент манипулирования образами дисков виртуальных машин QEMU.<br>В процессе установки Proxmox VE утилита qemu-img устанавливается автоматически.</p>
+<p>Использование:</p>
+<div class="messtext">
+<p># <span class="textcopy">qemu-img command [command options]</span></p>
+</div>
+<p>Возможно использование следующих комманд:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">create</span> &ndash; создание образа диска;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">check</span> &ndash; проверка образа диска на ошибки;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">convert</span> &ndash; конвертация образа диска в другой формат;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">info</span> &ndash; получение информации об образе диска;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">snapshot</span> &ndash; управляет снимками состояний (snapshot) образов дисков;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">commit</span> &ndash; записывает произведённые изменения на образ диска;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">rebase</span> &ndash; создаёт новый базовый образ диска на основании существующего.
+</p>
+<p>Утилита поддерживает следующие форматы виртуальных дисков:&nbsp;&nbsp;<span class="textmark">cow</span>, <span class="textmark">qcow</span>, <span class="textmark">qcow2</span> (KVM, Xen);&nbsp;&nbsp;<span class="textmark">vmdk</span> (VMware);&nbsp;&nbsp;<span class="textmark">vhd</span>, <span class="textmark">vhdx</span> (Hyper-V);&nbsp;&nbsp;<span class="textmark">vdi</span> (VirtualBox);&nbsp;&nbsp;<span class="textmark">cloop</span> &ndash; единственное применение которого состоит в обеспечении повторного использования сжатых напрямую образов CD-ROM; а также&nbsp;&nbsp;<span class="textmark">raw</span>.</p>
+<p>Пример конвертирования обаза диска из фомата&nbsp;&nbsp;<span class="textmark">raw</span> в&nbsp;&nbsp;<span class="textmark">qcow2</span>:</p>
+<div class="messtext">
+<p># <span class="textcopy">qemu-img convert -f raw -O qcow2 image.img image.qcow2</span></p>
+</div>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

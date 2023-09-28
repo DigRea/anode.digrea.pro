@@ -1,0 +1,70 @@
+/* main styles */
+body
+{ background: fixed black top center no-repeat;
+  background-size: cover; overflow: scroll; }
+@font-face
+{ src: url("play.ttf") format('truetype');
+  font-weight: normal; font-family: 'Play'; }
+@font-face
+{ src: url("anonymous.ttf") format('truetype');
+  font-weight: normal; font-family: 'Anonymous'; }
+#outblock
+{ position: absolute; height: auto; width: 99%; }
+#innblock
+{ width: 998px; text-align: left; height: 100%; position: relative; }
+#subblock
+{ position: absolute; height: auto; width: 720px; top: -4px; left: 274px; }
+.maincont
+{ width: 694px; position: absolute; height: auto; top: 43px; left: 0px;
+  border: 3px solid #545454; background-color: black; color: #b5b5b5;
+  border-radius: 0; padding: 10px; font-family: Play; }
+
+/* content styles */
+hr.contline
+{ width: 693px; height: 3px; background-color: #545454; border: none;
+  color: #545454; margin: 20px 0 20px 0 }
+.conthead
+{ font-size: 20px; margin: 10px; text-indent: 10px; font-weight: bold }
+.contdate
+{ color: chocolate; font-weight: bold }
+.contsubs
+{ font-size: 16px; margin: 10px; text-indent: -10px; font-weight: bold }
+.contlead
+{ font-size: 14px; text-indent: 0px; width: 688px; font-weight: light;
+  margin: 10px 10px 10px 0px }
+.conttext
+{ font-size: 14px; text-align: justify; width: 688px; text-indent: 0px;
+  margin: 10px 10px 10px 0px; font-weight: light }
+.textlink
+{ text-decoration: none; list-style-type: none; outline: none }
+a.textlink
+{ color: chocolate; font-weight: normal }
+a.textlink:visited
+{ color: chocolate }
+a.textlink:hover
+{ color: orange }
+a.textlink:active
+{ color: orange }
+.textwarn
+{ color: orange }
+.textfile
+{ color: white; font-family: Anonymous; font-size: 14px }
+.textcopy
+{ user-select: contain; -moz-user-select: text; -webkit-user-select: text;
+  -ms-user-select: element; -o-user-select: text }
+.textmark
+{ color: white }
+.messfile
+{ border: 2px dotted #b5b5b5; padding: 0px 10px; text-indent: 0px;
+  background-color: #262626; font-family: Anonymous; font-size: 14px;
+  color: goldenrod; width: 670px; margin: 0 }
+.messtext
+{ border: 2px dotted #b5b5b5; padding: 0px 10px; text-indent: 0px;
+  background-color: #262626; font-family: Anonymous; font-size: 14px;
+  color: white; width: 670px; margin: 0 }
+.messview
+{ border: 2px dotted #b5b5b5; padding: 0px 10px; text-indent: 0px;
+  background-color: #262626; font-family: Anonymous; font-size: 14px;
+  color: yellow; width: 670px; margin: 0 }
+hr.footline
+{ width: 710px; height: 3px; border: none }

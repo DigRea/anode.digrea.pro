@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">GrayLog 2. Установка на Debian 8</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Установка GrayLog 2 на Debian 8 Jessie.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Май 2018.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>Июль 2022.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
+</div><br>
+<div class="conttext">
+<p><span class="textmark">GrayLog</span> &ndash; это Open Source решение для сбора логов с различных серверов. Логи хранятся в базе данных&nbsp;&nbsp;<span class="textmark">MongoDB</span>, поиск по которой осуществляется с помощью&nbsp;&nbsp;<span class="textmark">Elasticsearch</span>.</p>
+<p class="textwarn">Настоятельно рекомендуется использовать 64-битную версию системы, т.к. в 32-битной версии MongoDB имеется ограничение на размер базы данных в 2Gb. К тому же в стандартных 32-битных репозиториях нет пакета <i>mongodb-org</i> (скорее всего, MongoDB придётся собирать вручную из исходников).</p>
+<p>Первым делом нужно установить 8-ю версию&nbsp;&nbsp;<span class="textmark">Java</span>, которая доступна в репозитории&nbsp;&nbsp;<span class="textmark">jessie-backports</span>:</p>
+<div class="messtext">
+<p># <span class="textcopy">echo "deb http://ftp.debian.org/debian jessie-backports main" &gt;&gt; \<br>
+/etc/apt/sources.list</span></p>
+</div>
+<p>Далее:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-get update</span><br>
+$ <span class="textcopy">sudo apt-get -t jessie-backports install openjdk-8-jre-headless</span></p>
+</div>
+<p>Теперь импортируем ключ, добавляем репозиторий и ставим&nbsp;&nbsp;<span class="textmark">MongoDB</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 \<br>
+--recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5</span><br>
+$ <span class="textcopy">echo "deb http://repo.mongodb.org/apt/debian jessie/mongodb-org/3.6 main" | \<br>
+sudo tee /etc/apt/sources.list.d/mongodb-org-3.6.list</span><br>
+$ <span class="textcopy">sudo apt-get update</span><br>
+$ <span class="textcopy">sudo apt-get install -y mongodb-org</span></p>
+</div>
+<p>Активируем и запускаем сервис&nbsp;&nbsp;<span class="textmark">mongod</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl daemon-reload</span><br>
+$ <span class="textcopy">sudo systemctl enable mongod.service</span><br>
+$ <span class="textcopy">sudo systemctl restart mongod.service</span></p>
+</div>
+<p>Ставим дополнительные пакеты:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-get install apt-transport-https pwgen</span></p>
+</div>
+<p>То же самое для&nbsp;&nbsp;<span class="textmark">Elasticsearch</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | \<br>
+sudo apt-key add -</span><br>
+$ <span class="textcopy">echo "deb https://artifacts.elastic.co/packages/5.x/apt stable main" | \<br>
+sudo tee -a /etc/apt/sources.list.d/elastic-5.x.list</span><br>
+$ <span class="textcopy">sudo apt update && sudo apt install elasticsearch</span></p>
+</div>
+<p>Теперь нужно внести изменения в файл конфигурации&nbsp;&nbsp;<span class="textmark">Elasticsearch</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /etc/elasticsearch/elasticsearch.yml</span></p>
+</div>
+<p>Раскомментируем и изменим следующие строки:</p>
+<div class="messfile">
+<p><span class="textcopy">cluster.name: graylog</span><br>
+<span class="textcopy">network.host: localhost</span></p>
+</div>
+<p><span class="textmark">Elasticsearch</span> также, как и <span class="textmark">GrayLog</span> оперирует понятием "кластер", поэтому в конфигурационных файлах прописываем один и тот же <span class="textmark">cluster.name</span> &ndash; <span class="textmark">graylog</span>. Для того, чтобы поиском по базе данных нельзя было воспользоваться по сети, меняем значение параметра&nbsp;&nbsp;<span class="textmark">network.host</span> на&nbsp;&nbsp;<span class="textmark">localhost</span>.</p>
+<p>Остаётся только установить&nbsp;&nbsp;<span class="textmark">graylog-server</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget https://packages.graylog2.org/repo/packages/\<br>
+graylog-2.4-repository_latest.deb</span><br>
+$ <span class="textcopy">sudo dpkg -i graylog-2.4-repository_latest.deb</span><br>
+$ <span class="textcopy">sudo apt update && sudo apt install graylog-server</span></p>
+</div>
+<p>Далее необходимо сгенерировать пароли:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">SECRET=$(pwgen -s 96 1)</span><br>
+$ <span class="textcopy">sudo -E sed -i -e \<br>
+''s/password_secret =.*/password_secret = ''$SECRET''/'' \<br>
+/etc/graylog/server/server.conf</span><br>
+$ <span class="textcopy">PASSWORD=$(echo -n <b>somepass</b> | shasum -a 256 | awk ''{print $1}'')</span><br>
+$ <span class="textcopy">sudo -E sed -i -e \<br>
+''s/root_password_sha2 =.*/root_password_sha2 = ''$PASSWORD''/'' \<br>
+/etc/graylog/server/server.conf</span></p>
+</div>
+<p>Здесь вместо&nbsp;&nbsp;<span class="textmark">somepass</span> подставляем пароль для входа на web-интерфейс.</p>
+<p>Внесём изменения в файл конфигурации&nbsp;&nbsp;<span class="textmark">GrayLog</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /etc/graylog/server/server.conf</span></p>
+</div>
+<p>Приведём следующие строки к соответствующим параметрам:</p>
+<div class="messfile">
+<p><span class="textcopy">rest_listen_uri = http://ip-address:9000/api/</span><br>
+<span class="textcopy">web_listen_uri = http://ip-address:9000/</span><br>
+<span class="textcopy">root_timezone = W-SU</span><br>
+<span class="textcopy">elasticsearch_index_prefix = graylog</span></p>
+</div>
+<p>В строке&nbsp;&nbsp;<span class="textmark">root_timezone</span> нужно указать параметр, соответствующий текущему месторасположению.</p>
+<p>Включим сервисы&nbsp;&nbsp;<span class="textmark">elasticsearch</span> и&nbsp;&nbsp;<span class="textmark">graylog-server</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl enable elasticsearch.service</span><br>
+$ <span class="textcopy">sudo systemctl start elasticsearch.service</span><br>
+$ <span class="textcopy">sudo systemctl enable graylog-server.service</span><br>
+$ <span class="textcopy">sudo systemctl start graylog-server.service</span></p>
+</div>
+<p>После перезапуска системы можно зайти на web-интерфейс:&nbsp;&nbsp;<span class="textmark textcopy">http://ip-address:9000/</span></p>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>

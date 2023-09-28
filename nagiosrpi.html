@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead"><b>Nagios. Установка на Debian 11</b></p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Установка Nagios Core 4.x на Debian 11 Bullseye.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Октябрь 2017.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>Июнь 2023.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p></div><br>
+<div class="conttext">
+<p><span class="textmark">Nagios</span> &ndash; программа с открытым кодом, предназначенная для мониторинга компьютерных систем и сетей: наблюдения, контроля состояния вычислительных узлов и служб, оповещения администратора в том случае, если какие-то из служб прекращают (или возобновляют) свою работу.</p>
+<p>В этой статье будет рассмотрена установка <span class="textmark">Nagios Core</span> на одноплатный компьютер Raspberry Pi 2 с операционной системой Debian 11 Bullseye. Подробный процесс настройки этой ОС на RPi описан в статье&nbsp;&nbsp;<a href="/pages/rpidebian.php" class="textlink">Debian на Raspberry Pi 2.</a></p>
+<p>Ставим Apache и PHP:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-get install apache2 php7.4 libapache2-mod-php7.4 mcrypt</span></p>
+</div>
+<p>Создаём пользователя и группу:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo useradd nagios</span><br>
+$ <span class="textcopy">sudo groupadd nagcmd</span><br>
+$ <span class="textcopy">sudo usermod -a -G nagcmd nagios</span><br>
+$ <span class="textcopy">sudo usermod -G nagcmd www-data</span></p>
+</div>
+<p>Устанавливаем зависимости:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt-get install build-essential ca-certificates apache2-utils openssl \<br>libssl-dev fcgiwrap libgd-dev</span></p>
+</div>
+<p>Скачиваем последний стабильный Nagios Core:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nagios-4.4.13.tar</span></p>
+</div>
+<p>Распаковываем архив и собираем Nagios:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">tar -xf nagios-4.4.13.tar</span><br>
+$ <span class="textcopy">cd nagios-4.4.13/</span><br>
+$ <span class="textcopy">./configure --with-nagios-group=nagios --with-command-group=nagcmd</span><br>
+$ <span class="textcopy">make all</span><br>
+$ <span class="textcopy">sudo make install</span><br>
+$ <span class="textcopy">sudo make install-commandmode</span><br>
+$ <span class="textcopy">sudo make install-init</span><br>
+$ <span class="textcopy">sudo make install-config</span><br>
+$ <span class="textcopy">sudo make install-webconf</span><br>
+$ <span class="textcopy">cd ..</span></p>
+</div>
+<p>Скачиваем последнюю версию плагинов:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nagios-plugins-2.4.4.tar</span></p>
+</div>
+<p>Распаковываем архив и собираем Nagios Plugins:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">tar -xf nagios-plugins-2.4.4.tar</span><br>
+$ <span class="textcopy">cd nagios-plugins-2.4.4/</span><br>
+$ <span class="textcopy">./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl</span><br>
+$ <span class="textcopy">make</span><br>
+$ <span class="textcopy">sudo make install</span><br>
+$ <span class="textcopy">cd ..</span></p>
+</div>
+<p>Скачиваем последнюю версию NRPE:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nrpe-4.0.2.tar</span></p>
+</div>
+<p>Распаковываем архив:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">tar -xf nrpe-4.0.2.tar</span><br>
+$ <span class="textcopy">cd nrpe-4.0.2/</span></p>
+</div>
+<p>В процессе сборки NRPE нужно будет указать библиотеку, которая зависит от архитектуры системы.<br>Просмотрим содержимое папки&nbsp;&nbsp;<span class="textmark">/var/lib/</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">ls /usr/lib/</span></p>
+</div>
+<p>Библиотека имеет вид <span class="textmark">*-linux-gnu</span>, где <span class="textmark">*</span> &ndash; и есть архитектура системы. Для 32-х битных систем &ndash; это <span class="textmark textcopy">i386-linux-gnu</span>, для 64-х битных &ndash; <span class="textmark textcopy">x86_64-linux-gnu</span>. В данном случае, на RPi2 (для процессоров <span class="textmark">ARM</span>) &ndash; это&nbsp; <span class="textmark textcopy">arm-linux-gnueabihf</span>.</p>
+<p>Теперь нужно собрать NRPE.&nbsp;&nbsp;<span class="textwarn">На RPi2 эта процедура может занять около 20 минут!</span></p>
+<div class="messtext">
+<p>$ <span class="textcopy">./configure --with-ssl=/usr/bin/openssl \<br>
+ --with-ssl-lib=/usr/lib/<b>arm-linux-gnueabihf</b></span><br>
+$ <span class="textcopy">make all</span><br>
+$ <span class="textcopy">sudo make install</span><br>
+$ <span class="textcopy">sudo make install-plugin</span><br>
+$ <span class="textcopy">sudo make install-config</span><br>
+$ <span class="textcopy">sudo make install-daemon</span><br>
+$ <span class="textcopy">sudo make install-init</span><br>
+$ <span class="textcopy">cd ..</span></p>
+</div>
+<p>Включаем модуль CGI для Apache:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo a2enmod cgi</span><br>
+$ <span class="textcopy">sudo service apache2 restart</span>
+</p></div>
+<p>Создаём пользователя&nbsp;&nbsp;<span class="textmark">nagiosadmin</span> (для доступа к web-интерфейсу&nbsp;&nbsp;<span class="textmark">nagios</span>):</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo htpasswd -c /usr/local/nagios/etc/htpasswd.users nagiosadmin</span></p>
+</div>
+<p>Включеам сервисы&nbsp;&nbsp;<span class="textmark">Nagios</span> и&nbsp;&nbsp;<span class="textmark">NRPE</span>:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl enable nagios.service</span><br>
+$ <span class="textcopy">sudo systemctl enable nrpe.service</span>
+</p></div>
+<p>И перегружаем систему:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo reboot</span></p>
+</div>
+<p>После перезагрузки можно зайти на web-интерфейс:&nbsp;&nbsp;<span class="textmark textcopy">http://ip-address/nagios</span>.</p>
+<p>Логин &ndash; <span class="textmark">nagiosadmin</span>, пароль &ndash; тот, который вводился при создании этого пользователя.</p>
+<a name="nagsetting"></a><p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Базовая настройка сервера Nagios Core</p>
+<p>Настройка сервера Nagios Core сводится к редактированию конфигурационных файлов, организацию которых мы и рассмотрим далее.</p>
+<p>Все конфигурационные файлы и директории подключаются в главном файле конфигурации путём несложных конструкций&nbsp;&nbsp;<span class="textmark">cfg_file=</span>&nbsp;&nbsp;и&nbsp;&nbsp;<span class="textmark">cfg_dir=</span> . Основной рабочей директорией сервера Nagios Core является&nbsp;&nbsp;<span class="textmark">/usr/local/nagios/</span> , в которой плагины находятся в директории&nbsp;&nbsp;<span class="textmark">libexec/</span> , а конфигурационные файлы &ndash; в&nbsp;&nbsp;<span class="textmark">etc/</span> .</p>
+<p>Довольно удобным вариантом будет создание отдельной директории для конфигурационных файлов серверов, которые планируется подключить к серверу мониторинга:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo mkdir /usr/local/nagios/etc/servers</span></p>
+</div>
+<p>Далее эту директорию необходимо прописать в конфигурационном файле Nagios Core:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /usr/local/nagios/etc/nagios.cfg</span></p>
+</div>
+<p>Именно здесь и перечислены те самые конструкции&nbsp;&nbsp;<span class="textmark">cfg_file= </span>, где и подключаются конфигурационные файлы&nbsp;&nbsp;<span class="textmark">commands.cfg</span>,&nbsp;&nbsp;<span class="textmark">contacts.cfg</span>,&nbsp;&nbsp;<span class="textmark">timeperiods.cfg</span>&nbsp;&nbsp;и&nbsp;&nbsp;<span class="textmark">templates.cfg</span>.</p>
+<p>Подключим директорию, добавив следующую строку:</p>
+<div class="messfile textcopy">
+<p>cfg_dir=/usr/local/nagios/etc/servers</p>
+</div>
+<p>Мониторинг хостов осуществляется при помощи расширения&nbsp;&nbsp;<span class="textmark">NRPE</span> &ndash; Nagios Remote Plugin Executor.<br>
+Поэтому сначала нужно создать команду NRPE-проверки:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /usr/local/nagios/etc/objects/commands.cfg</span></p>
+</div>
+<p>Дописываем в конец файла следующую конструкцию:</p>
+<div class="messfile textcopy">
+<p>define command {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command_name check_nrpe<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;command_line $USER1$/check_nrpe -H $HOSTADDRESS$ -c $ARG1$<br>
+}</p>
+</div>
+<p>И перегружаем сервис:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo service nagios restart</span></p>
+</div><br>
+<a name="nagroups"></a><p class="contsubs">Группировка объектов мониторинга</p>
+<p>Хосты, которые необходимо мониторить, можно объединять в группы. При этом один хост может входить в различные группы. Создаём файл конфигурации:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo touch /usr/local/nagios/etc/objects/groups.cfg</span></p>
+</div>
+<p>И прописываем его в конфигурационный файл <span class="textmark textcopy">/usr/local/nagios/etc/nagios.cfg</span> путём добавления следующей строки:</p>
+<div class="messfile textcopy">
+<p>cfg_file=/usr/local/nagios/etc/objects/groups.cfg</p>
+</div>
+<p>Теперь, чтобы создать группу и поместить в неё хосты, отредактируем файл конфигурации:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /usr/local/nagios/etc/objects/groups.cfg</span></p>
+</div>
+<p>Cоздадим группу&nbsp;&nbsp;<span class="textmark">web-servers</span> и добавим в неё хосты&nbsp;&nbsp;<span class="textmark">HOST-01</span> и&nbsp;&nbsp;<span class="textmark">HOST-02</span>:</p>
+<div class="messfile textcopy">
+<p>define hostgroup {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hostgroup_name <b>web-servers</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;members <b>HOST-01</b>, <b>HOST-02</b><br>
+}</p>
+</div>
+<p class="textwarn">После каждого внесения изменений в конфигурационные файлы необходимо перезапускать сервис Nagios.</p>
+<p>Для проверки правильности конфигурации можно использовать следующую команду:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg</span></p>
+</div>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>
