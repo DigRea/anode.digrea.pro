@@ -34,8 +34,8 @@
 </div>
 <p>Скачиваем, распаковываем и собираем Nagios Plugins:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">wget srv_addr/storage/nagiosrpi/nagios-plugins-2.4.4.tar</span><br>
-$ <span class="textcopy">tar -xf nagios-plugins-2.4.4.tar</span><br>
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nagios-plugins-2.4.4.tar.gz</span><br>
+$ <span class="textcopy">tar -xf nagios-plugins-2.4.4.tar.gz</span><br>
 $ <span class="textcopy">cd nagios-plugins-2.4.4/</span><br>
 $ <span class="textcopy">./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl</span><br>
 $ <span class="textcopy">make</span><br>
@@ -44,8 +44,8 @@ $ <span class="textcopy">cd ..</span></p>
 </div>
 <p>Скачиваем и распаковываем NRPE:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">wget srv_addr/storage/nagiosrpi/nrpe-4.0.2.tar</span><br>
-$ <span class="textcopy">tar -xf nrpe-4.0.2.tar</span><br>
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nrpe-4.0.2.tar.gz</span><br>
+$ <span class="textcopy">tar -xf nrpe-4.0.2.tar.gz</span><br>
 $ <span class="textcopy">cd nrpe-4.0.2/</span></p>
 </div>
 <p>В процессе сборки NRPE нужно будет указать библиотеку, которая зависит от архитектуры системы.<br>Просмотрим содержимое папки&nbsp;&nbsp;<span class="textmark">/var/lib/</span>:</p>
@@ -105,7 +105,7 @@ command[check_apt]=/usr/local/nagios/libexec/check_apt</div>
 </div>
 <p>Скачаем и распакуем дополнительные плагины:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">wget srv_addr/storage/nagioslin/nagios-custom-plugins.tar.gz</span><br>
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nagios-custom-plugins.tar.gz</span><br>
 $ <span class="textcopy">tar -xf nagios-custom-plugins.tar.gz</span></p>
 </div>
 <p>Дадим права и переместим в папку плагинов:</p>

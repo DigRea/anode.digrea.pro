@@ -39,11 +39,11 @@ $ <span class="textcopy">sudo usermod -G nagcmd www-data</span></p>
 </div>
 <p>Скачиваем последний стабильный Nagios Core:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nagios-4.4.13.tar</span></p>
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nagios-4.4.13.tar.gz</span></p>
 </div>
 <p>Распаковываем архив и собираем Nagios:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">tar -xf nagios-4.4.13.tar</span><br>
+<p>$ <span class="textcopy">tar -xf nagios-4.4.13.tar.gz</span><br>
 $ <span class="textcopy">cd nagios-4.4.13/</span><br>
 $ <span class="textcopy">./configure --with-nagios-group=nagios --with-command-group=nagcmd</span><br>
 $ <span class="textcopy">make all</span><br>
@@ -56,11 +56,11 @@ $ <span class="textcopy">cd ..</span></p>
 </div>
 <p>Скачиваем последнюю версию плагинов:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nagios-plugins-2.4.4.tar</span></p>
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nagios-plugins-2.4.4.tar.gz</span></p>
 </div>
 <p>Распаковываем архив и собираем Nagios Plugins:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">tar -xf nagios-plugins-2.4.4.tar</span><br>
+<p>$ <span class="textcopy">tar -xf nagios-plugins-2.4.4.tar.gz</span><br>
 $ <span class="textcopy">cd nagios-plugins-2.4.4/</span><br>
 $ <span class="textcopy">./configure --with-nagios-user=nagios --with-nagios-group=nagios --with-openssl</span><br>
 $ <span class="textcopy">make</span><br>
@@ -69,11 +69,11 @@ $ <span class="textcopy">cd ..</span></p>
 </div>
 <p>Скачиваем последнюю версию NRPE:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nrpe-4.0.2.tar</span></p>
+<p>$ <span class="textcopy">wget srv_addr/storage/nagios/nrpe-4.0.2.tar.gz</span></p>
 </div>
 <p>Распаковываем архив:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">tar -xf nrpe-4.0.2.tar</span><br>
+<p>$ <span class="textcopy">tar -xf nrpe-4.0.2.tar.gz</span><br>
 $ <span class="textcopy">cd nrpe-4.0.2/</span></p>
 </div>
 <p>В процессе сборки NRPE нужно будет указать библиотеку, которая зависит от архитектуры системы.<br>Просмотрим содержимое папки&nbsp;&nbsp;<span class="textmark">/var/lib/</span>:</p>
