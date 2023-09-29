@@ -16,7 +16,7 @@
 <p class="conthead">Nagios. Мониторинг Linux-хоста</p>
 <hr class="contline">
 <div class="contlead">
-<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Nagios, часть 2 - Подключение Linux-хоста к серверу Nagios Core.<br>
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Подключение Linux-хоста к серверу Nagios Core.<br>
 <span class="contdate">Дата:&nbsp;&nbsp;</span>Сентябрь 2022.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>Сентябрь 2023.<br>
 <span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
 </div><br>
@@ -71,21 +71,25 @@ $ <span class="textcopy">cd ..</span></p>
 </div>
 <p>Далее нужно определить, что именно мы будем мониторить на сервере и прописать соответствующие плагины в NRPE.</p>
 <p>Из стандартного набора плагинов можно использовать следующие:</p>
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">LOAD (check_load)</span> &ndash; текущая загрузка системы;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">SWAP (check_swap)</span> &ndash; использование подкачки;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">APT (check_apt)</span> &ndash; мониторинг менеджера apt на нвличие обновлений системы.</p>
-<p>В следующей <a href="/pages/nagplugs.php" class="textlink">статье</a> будет рассмотрено подключение дополнительных плагинов.</p>
-<p>Внесём изменения в файл конфигурации NRPE:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">check_load</span> &ndash; текущая загрузка системы;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">check_swap</span> &ndash; использование подкачки;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">check_apt</span> &ndash; мониторинг менеджера apt на нвличие обновлений системы.<br>
+<p>Сторонние плагины:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">check_disk_space</span> &ndash; использование раздела на диске (например, корневого раздела);<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">custom_check_mem</span> &ndash; использование памяти;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">сheck_nfs.sh</span> &ndash; работоспособность сервиса NFS;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;<span class="textmark">check_mdstat.sh</span> &ndash; мониторинг Software RAID (mdadm).
+</p>
+<p>Отредактируем файл конфигурации NRPE:</p>
 <div class="messtext">
 <p>$ <span class="textcopy">sudo nano /usr/local/nagios/etc/nrpe.cfg</span></p>
 </div>
-<p>Здесь отредактируем опцию <span class="textmark">allowed_hosts</span>, где укажем адрес сервера Nagios Core (в данном случае - 10.0.0.10) и модифицируем все записи <span class="textmark">command[check_...</span> (соответствующие тем плагинам, которые мы будем использовать):</p>
+<p>Здесь в опцию <span class="textmark">allowed_hosts</span> нужно добавить ip-адрес сервера Nagios (в данном случае - 10.0.0.10) и модифицировать все записи <span class="textmark">command[check_...]=</span>, соответствующие тем плагинам, которые мы будем использовать:</p>
 <div class="messfile textcopy">
 <p>allowed_hosts=10.0.0.10<br>
 ...<br><br>
 command[check_swap]=/usr/local/nagios/libexec/check_swap -w 20% -c 10%<br>
-command[check_apt]=/usr/local/nagios/libexec/check_apt<br>
-</p></div>
+command[check_apt]=/usr/local/nagios/libexec/check_apt</div>
 <p>Для определения загрузки процессора <span class="textmark">(check_load)</span> необходимо ввести значения, соответствующие количеству ядер процессора:</p>
 <p><table style="width: 400px; text-indent: 20px;">
 <tr><td>1 Core</td><td>-w .15,.10,.05 -c .30,.25,.20</td></tr>
@@ -99,8 +103,37 @@ command[check_apt]=/usr/local/nagios/libexec/check_apt<br>
 <div class="messfile textcopy">
 <p>command[check_load]=/usr/local/nagios/libexec/check_load -r -w .3,.2,.1 -c .6,.5,.4</p>
 </div>
+<p>Скачаем и распакуем дополнительные плагины:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget srv_addr/storage/nagioslin/nagios-custom-plugins.tar.gz</span><br>
+$ <span class="textcopy">tar -xf nagios-custom-plugins.tar.gz</span></p>
+</div>
+<p>Дадим права и переместим в папку плагинов:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo chmod +x c*</span><br>
+$ <span class="textcopy">sudo mv c* /usr/local/nagios/libexec/</span></p>
+</div>
+<p>Для мониторинга сервиса NFS добавим следующую запись:</p>
+<div class="messfile textcopy">
+<p>command[check_nfs]=/usr/local/nagios/libexec/check_nfs.sh</p>
+</div>
+<p>Для мониторинга разделов на диске необходимо прописать точку монтирования (например, корневого раздела - <b>/</b>):</p>
+<div class="messfile textcopy">
+<p>command[check_disk]=/usr/local/nagios/libexec/check_disk_space -w 85 -c 95 -p /</p>
+</div>
+<p>Далее пропишем плагин мониторинга памяти:</p>
+<div class="messfile textcopy">
+<p>command[check_memory]=/usr/local/nagios/libexec/custom_check_mem -w 10 -c 5</p>
+</div>
+<p class="textwarn">Для правильной работы плагина необходимо доставить следующие пакеты:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo apt install dc gawk</span></p>
+</div>
+<p>Для мониторинга программного RAID-массива <span class="textmark">(check_mdstat.sh)</span> следует указать устройство (md0, md1, md2...) и количество дисков. В этом примере используем устройство <span class="textmark">md0</span> с 4-мя дисками в массиве:</p>
+<div class="messfile textcopy">
+<p>command[check_mdstat]=/usr/local/nagios/libexec/check_mdstat.sh md0 4</p>
+</div>
 <p>После презапуска сервиса NRPE (<span class="textcopy">sudo service nrpe restart</span>) настройку хоста можно считать законченной.</p>
-<p class="textwarn">Если хост находится в другой подсети, то на шлюзе между подсетями нужно пробрасывать порт <b>5666</b>, так как именно через этот порт работает сервис NRPE.</p>
 <p style="font-size: 1px">&nbsp;</p>
 <p class="contsubs">Настройка сервера</p>
 <p>Теперь пропишем хост на сервере мониторинга. Создадим файл хоста, например, <span class="textmark">webserv</span>:</p>
@@ -116,7 +149,7 @@ command[check_apt]=/usr/local/nagios/libexec/check_apt<br>
 &nbsp;&nbsp;&nbsp;&nbsp;address&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;10.0.0.44<br>
 }</p>
 </div>
-<p>И необходимые секции мониторинга:</p>
+<p>А также необходимые секции мониторинга (здесь <span class="textmark">LOAD</span> и <span class="textmark">MDStat</span> &ndash; это понятные названия сервисов, которые будут отображаться на web-интерфейсе сервера):</p>
 <div class="messfile textcopy">
 <p>...<br><br>
 define service {<br>
@@ -124,24 +157,18 @@ define service {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;host_name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;webserv<br>
 &nbsp;&nbsp;&nbsp;&nbsp;service_description&nbsp;&nbsp;&nbsp;&nbsp;LOAD<br>
 &nbsp;&nbsp;&nbsp;&nbsp;check_command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check_nrpe!check_load<br>
-}<br>
-<br>
+}<br><br>
+...
+<br><br>
 define service {<br>
 &nbsp;&nbsp;&nbsp;&nbsp;use&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generic-service<br>
 &nbsp;&nbsp;&nbsp;&nbsp;host_name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;webserv<br>
-&nbsp;&nbsp;&nbsp;&nbsp;service_description&nbsp;&nbsp;&nbsp;&nbsp;APT<br>
-&nbsp;&nbsp;&nbsp;&nbsp;check_command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check_nrpe!check_apt<br>
-}<br>
-<br>
-define service {<br>
-&nbsp;&nbsp;&nbsp;&nbsp;use&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generic-service<br>
-&nbsp;&nbsp;&nbsp;&nbsp;host_name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;webserv<br>
-&nbsp;&nbsp;&nbsp;&nbsp;service_description&nbsp;&nbsp;&nbsp;&nbsp;SWAP<br>
-&nbsp;&nbsp;&nbsp;&nbsp;check_command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check_nrpe!check_swap<br>
+&nbsp;&nbsp;&nbsp;&nbsp;service_description&nbsp;&nbsp;&nbsp;&nbsp;MDStat<br>
+&nbsp;&nbsp;&nbsp;&nbsp;check_command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check_nrpe!check_mdstat<br>
 }<br><br>
 ...
 </div>
-<p>Для наглядного отображения зависимости серверов друг от друга (например, в пункте меню <span class="textmark">Map (Legacy)</span>) в секцию <span class="textmark">define host</span> можно добавить запись <span class="textmark">parents otherhost</span>, где <span class="textmark">otherhost</span> - сервер, являющийся "родителем" сервера <span class="textmark">webserv</span> (в данном случае).</p>
+<p>Для наглядного отображения зависимости серверов друг от друга в пункте меню <span class="textmark">Map (Legacy)</span> в секцию <span class="textmark">define host</span> можно добавить запись <span class="textmark">parents otherhost</span>, где <span class="textmark">otherhost</span> - сервер, являющийся "родителем" сервера <span class="textmark">webserv</span> (в данном случае).</p>
 <p>Ну и, как обычно, после любых изменений конфигурационных файлов следует перезапустить сервис Nagios:</p>
 <div class="messtext">
 <p>$ <span class="textcopy">sudo service nagios restart</span></p>
