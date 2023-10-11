@@ -23,10 +23,58 @@
 <div class="conttext">
 <p>В этой статье рассматривается настройка мониторинга контроллера MegaRAID при помощи утилиты <span class="textmark">megacli</span> на ОС Debian 11 Bullseye.</p>
 <p><span class="textmark">MegaCli</span> &ndash; это утилита командной строки благодаря которой можно производить любые настройки RAID-контролеров производителя LSI/Avago.</p>
+<p>После подключения Linux-хоста к серверу Nagios, описанного в предыдущей <a href="/pages/nagioslin.php" class="textlink">статье</a>, добавим проверку контроллера MegaRAID.</p>
 <p>Скачаем и установим пакет megacli:</p>
 <div class="messtext">
 <p># <span class="textcopy">wget srv_addr/storage/megaraid/megacli_8.07.14-3+Debian.11.bullseye_amd64.deb</span><br>
 # <span class="textcopy">dpkg -i megacli_8.07.14-3+Debian.11.bullseye_amd64.deb</span></p>
+</div>
+<p>Далее скачаем, распакуем и скопируем плагин в папку с остальными плагинами:</p>
+<div class="messtext">
+<p># <span class="textcopy">wget srv_addr/storage/nagios/megaraid-plugin.tar.gz</span><br>
+# <span class="textcopy">tar -xf megaraid-plugin.tar.gz</span><br>
+# <span class="textcopy">chmod +x check_megaraid_sas</span><br>
+# <span class="textcopy">mv check_megaraid_sas /usr/local/nagios/libexec/</span></p>
+</div>
+<p class="textwarn">Существует один нюанс. Дело в том, что данный плагин запускает команду <b>megacli</b>, которая, в свою очередь, должна запускаться с правами суперпользователя.<p>
+<p>Поэтому откроем следующий файл:</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /etc/sudoers</span></p>
+</div>
+<p>И добавим запись:</p>
+<div class="messfile textcopy">
+<p>nagios ALL = NOPASSWD: /usr/sbin/megacli</p>
+</div>
+<p>Как и в прошлой статье, отредактируем файл конфигурации NRPE:</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /usr/local/nagios/etc/nrpe.cfg</span></p>
+</div>
+<p>Добавим проверку контроллера MegaRAID:</p>
+<div class="messfile textcopy">
+<p>command[check_megaraid]=/usr/local/nagios/libexec/check_megaraid_sas --sudo</p>
+</div>
+<p>И перезапустим сервис NRPE:</p>
+<div class="messtext">
+<p># <span class="textcopy">service nagios restart</span></p>
+</div>
+<p>Теперь сделаем настройку на сервере мониторинга. Откроем файл мониторинга соответствующего хоста (в прошлой статье мы решили их хранить в отдельной папке &ndash; <span class="textmark">/usr/local/nagios/etc/servers/</span>):</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /usr/local/nagios/etc/servers/myserver.cfg</span></p>
+</div>
+<p>И добавим следующую секцию:</p>
+<div class="messfile textcopy">
+<p>...<br><br>
+define service {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;use&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generic-service<br>
+&nbsp;&nbsp;&nbsp;&nbsp;host_name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;myserver<br>
+&nbsp;&nbsp;&nbsp;&nbsp;service_description&nbsp;&nbsp;&nbsp;&nbsp;RAID<br>
+&nbsp;&nbsp;&nbsp;&nbsp;check_command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check_nrpe!check_megaraid<br>
+}<br><br>
+...
+</div>
+<p>Ну и, как обычно, после любых изменений конфигурационных файлов следует перезапустить сервис на сервере Nagios:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo service nagios restart</span></p>
 </div>
 </div>
 
