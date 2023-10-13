@@ -22,6 +22,33 @@
 </div><br>
 <div class="conttext">
 <p>Сетевая файловая система <span class="textmark">NFS</span> &ndash; это распределённая файловая система, которая обеспечивает пользователям доступ к файлам, расположенным на удаленных компьютерах, и позволяет работать с этими файлами точно так же, как и с локальными.</p>
+<p>В этой статье рассмотрена установка и настройка NFS-сервера на ОС Debian 10 Buster, а также описан процесс монтирования NFS-ресурса на клиенте.</p>
+<p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">NFS-сервер</p>
+<p>Установим пакет NFS-сервера:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt install nfs-kernel-server</span>
+</p></div>
+<p>Далее определим каталог экспорта (в данном случае &ndash; <span class="textmark">shared</span>):</p>
+<div class="messtext"><p>
+# <span class="textcopy">mkdir -p /mnt/shared</span>
+</p></div>
+<p>И настроим права доступа к каталогу:</p>
+<div class="messtext"><p>
+# <span class="textcopy">chown nobody:nogroup /mnt/shared</span><br>
+# <span class="textcopy">chmod 755 /mnt/shared</span>
+</p></div>
+
+
+
+
+<p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">NFS-клиент</p>
+
+
+
+
+
 </div>
 <!-- END OF CONTENT -->
 
