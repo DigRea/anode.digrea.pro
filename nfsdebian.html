@@ -29,16 +29,26 @@
 <div class="messtext"><p>
 # <span class="textcopy">apt install nfs-kernel-server</span>
 </p></div>
-<p>Далее определим каталог экспорта (в данном случае &ndash; <span class="textmark">shared</span>):</p>
+<p>Далее определим каталоги экспорта (в данном случае &ndash; <span class="textmark">shared</span> и <span class="textmark">folder</span>):</p>
 <div class="messtext"><p>
-# <span class="textcopy">mkdir -p /mnt/shared</span>
+# <span class="textcopy">mkdir -p /mnt/shared /mnt/folder</span>
 </p></div>
-<p>И настроим права доступа к каталогу:</p>
+<p>И настроим права доступа к каталогам:</p>
 <div class="messtext"><p>
-# <span class="textcopy">chown nobody:nogroup /mnt/shared</span><br>
-# <span class="textcopy">chmod 755 /mnt/shared</span>
+# <span class="textcopy">chown nobody:nogroup /mnt/shared /mnt/folder</span><br>
+# <span class="textcopy">chmod 755 /mnt/shared /mnt/folder</span>
 </p></div>
-
+<p>Теперь в конфигурационном файле NFS-сервера укажем каталоги (каталог может быть и один) экспорта и кому, собственно, эти каталоги экспортировать:</p>
+<div class="messtext"><p>
+# <span class="textcopy">nano /etc/exports</span>
+</p></div>
+<p>Здесь сначала указывается каталог экспорта, затем кому экспортировать (имя хоста, ip-адрес или можно указать всю подсеть целиком) и в скобках параметры экспорта:</p>
+<div class="messfile textcopy">
+<p>/mnt/shared&nbsp;&nbsp;&nbsp;&nbsp;172.16.0.0/24(rw,sync,no_root_squash,no_subtree_check)<br>
+/mnt/folder&nbsp;&nbsp;&nbsp;&nbsp;172.16.0.21/24(rw,sync,no_root_squash,no_subtree_check)
+</p></div>
+<p>В данном случае коталог <span class="textmark">shared</span> мы экспортируем для всей подсети, а каталог <span class="textmark">folder</span> &ndash; только для хоста с конкретным ip-адресом.</p>
+<p>А теперь подробнее о параметрах экспорта.</p>
 
 
 
