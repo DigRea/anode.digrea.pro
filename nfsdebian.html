@@ -79,17 +79,30 @@
 <span class="textmark"><b>no_all_squash</b></span> &ndash; запрет подмены <b>uid/gid</b> от всех пользователей;<br>
 <span class="textmark"><b>anonuid=UID</b></span> и <span class="textmark"><b>anongid=GID</b></span> &ndash; (явная) установка <b>UID/GID</b> для анонимного пользователя. Параметр может быть полезен тогда, когда какая-либо директория экспортируется для конкретного пользователя, заведённого в системе;<br>
 <span class="textmark"><b>map_static=/etc/file_maps_users</b></span> &ndash; установка использования файла, в котором задаётся сопоставление удаленных <b>UID/GID</b> локальным <b>UID/GID</b>.</p>
-
-
-
 <p style="font-size: 1px">&nbsp;</p>
 <p class="contsubs">NFS-клиент</p>
-
-
-
-
-
-</div>
+<p></p>
+<p>Установим клиентскую часть NFS-сервера:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo apt install nfs-common</span>
+</p></div>
+<p>Далее создадим точку монтирования общей папки сервера NFS:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo mkdir -p /mnt/nfs-shared</span>
+</p></div>
+<p>И смонтируем общий каталог:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo mount 172.16.0.10:/mnt/shared /mnt/nfs-shared</span>
+</p></div>
+<p>Здесь <span class="textmark">172.16.0.10</span> &ndash; это ip-адрес NFS-сервера.</p>
+<p>Можно также монтировать папку автоматически при загрузке:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo nano /etc/fstab</span>
+</p></div>
+<p>Добавив в конец следующую запись:</p>
+<div class="messfile textcopy">
+<p>172.16.0.10:/mnt/shared /mnt/nsf-shared nfs default 0 0</p>
+</div></div>
 <!-- END OF CONTENT -->
 
 </div></div></div></div>
