@@ -24,6 +24,10 @@
 <p>В этой статье рассматривается настройка мониторинга контроллера MegaRAID при помощи утилиты <span class="textmark">megacli</span> на ОС Debian 11 Bullseye.</p>
 <p><span class="textmark">MegaCli</span> &ndash; это утилита командной строки благодаря которой можно производить любые настройки RAID-контролеров производителя LSI/Avago.</p>
 <p>После подключения Linux-хоста к серверу Nagios, описанного в предыдущей <a href="/pages/nagioslin.php" class="textlink">статье</a>, добавим проверку контроллера MegaRAID.</p>
+<p>Сначала установим зависимости:</p>
+<div class="messtext">
+<p># <span class="textcopy">apt install libncurses5 libtinfo5</span></p>
+</div>
 <p>Скачаем и установим пакет megacli:</p>
 <div class="messtext">
 <p># <span class="textcopy">wget srv_addr/storage/megaraid/\<br>megacli_8.07.14-3+Debian.11.bullseye_amd64.deb</span><br>
