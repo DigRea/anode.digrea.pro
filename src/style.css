@@ -28,7 +28,7 @@ hr.contline
 .contdate
 { color: chocolate; font-weight: bold }
 .contsubs
-{ font-size: 16px; margin: 10px; text-indent: -10px; font-weight: bold }
+{ font-size: 16px; margin: 10px; text-indent: -10px; font-weight: bold; color: white }
 .contlead
 { font-size: 14px; text-indent: 0px; width: 688px; font-weight: light;
   margin: 10px 10px 10px 0px }
