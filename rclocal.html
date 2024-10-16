@@ -20,8 +20,8 @@
 <span class="contdate">Дата:&nbsp;&nbsp;</span>Октябрь 2024.<br>
 <span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p></div><br>
 <div class="conttext">
-<p>Сервис <span class="textmark">rc.local</span> предназначен для автозапуска различных скриптов (или просто запуска каких-либо команд) при загрузке системы. В новых версиях дистрибутивов Debian этот сервис отсутствует. Поправим эту несправедливость! :)</p>
-<p>Первым делом создадим сам сервис:</p>
+<p>Сервис <span class="textmark">rc.local</span> предназначен для автозапуска различных скриптов (или просто каких-либо команд) при загрузке системы. В новых версиях дистрибутивов Debian этот сервис отсутствует. Так исправим же эту несправедливость! :)</p>
+<p>Первым делом создадим сервис:</p>
 <div class="messtext">
 <p>$ <span class="textcopy">sudo nano /etc/systemd/system/rc-local.service</span></p>
 </div>
@@ -74,13 +74,24 @@ exit 0</p>
 <div class="messtext">
 <p>$ <span class="textcopy">sudo systemctl start rc-local</span></p>
 </div>
-<p>Смотрим состояние сервиса:</p>
+<p>Просмотр состояние сервиса:</p>
 <div class="messtext">
 <p>$ <span class="textcopy">sudo systemctl status rc-local</span></p>
 </div>
 <p>Вывод:</p>
 <div class="messview"><p>
+● rc-local.service - /etc/rc.local<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Loaded: <b>loaded</b> (/etc/systemd/system/rc-local.service; <b>enabled</b>; preset: <b>enabled</b>)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Drop-In: /usr/lib/systemd/system/rc-local.service.d<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└─debian.conf<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Active: <b>active (exited)</b> since Sun 2024-10-06 01:16:26 MSK; 1 week 3 days ago<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Process: 1042 ExecStart=/etc/rc.local start (code=exited, status=0/SUCCESS)<br>
+&nbsp;&nbsp;&nbsp;Main PID: 1042 (code=exited, status=0/SUCCESS)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;CPU: 14ms<br>
+<br>
+окт 06 01:16:26 HOSTNAME systemd[1]: Started rc-local.service - /etc/rc.local.
 </p></div>
+<p>Теперь для добавления команды (или скрипта) в автозапуск необходимо в файле <span class="textmark textcopy">/etc/rc.local</span> ввести её до строки <span class="textmark">exit 0</span>.</p>
 </div>
 
 <!-- END OF CONTENT -->
