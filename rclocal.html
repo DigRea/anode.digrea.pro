@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead"><b>Сервис rc.local в Debian</b></p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Добавление rc.local в последние версии Debian.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>Октябрь 2024.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p></div><br>
+<div class="conttext">
+<p>Сервис <span class="textmark">rc.local</span> предназначен для автозапуска различных скриптов (или просто запуска каких-либо команд) при загрузке системы. В новых версиях дистрибутивов Debian этот сервис отсутствует. Поправим эту несправедливость! :)</p>
+<p>Первым делом создадим сам сервис:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /etc/systemd/system/rc-local.service</span></p>
+</div>
+<p>Записываем в файл следующее содержимое:</p>
+<div class="messfile textcopy">
+<p>[Unit]<br>
+Description=/etc/rc.local<br>
+ConditionPathExists=/etc/rc.local<br>
+<br>
+[Service]<br>
+Type=idle<br>
+ExecStart=/etc/rc.local start<br>
+TimeoutSec=0<br>
+StandardOutput=tty<br>
+RemainAfterExit=yes<br>
+<br>
+[Install]<br>
+WantedBy=multi-user.target</p>
+</div>
+<p>Далее создаём сам файл rc.local:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo nano /etc/rc.local</span></p>
+</div>
+<p>И записываем дефолтную конфигурацию:</p>
+<div class="messfile textcopy">
+<p>#!/bin/sh -e<br>
+#<br>
+# rc.local<br>
+#<br>
+# This script is executed at the end of each multiuser runlevel.<br>
+# Make sure that the script will "exit 0" on success or any other<br>
+# value on error.<br>
+#<br>
+# In order to enable or disable this script just change the execution<br>
+# bits.<br>
+#<br>
+# By default this script does nothing.<br>
+<br>
+exit 0</p>
+</div>
+<p>Даём права на выполнение:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo chmod +x /etc/rc.local</span></p>
+</div>
+<p>Добавляем сервис в автозапуск:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl enable rc-local</span></p>
+</div>
+<p>Запускаем сервис:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl start rc-local</span></p>
+</div>
+<p>Смотрим состояние сервиса:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo systemctl status rc-local</span></p>
+</div>
+<p>Вывод:</p>
+<div class="messview"><p>
+</p></div>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>
