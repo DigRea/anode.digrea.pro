@@ -28,6 +28,10 @@ $ <span class="textcopy">sudo nano /etc/ssh/sshd_config</span>
 <p>Находим строку <span class="textmark">#PermitRootLogin prohibit-password</span> и приводим её к следующему виду:</p>
 <div class="messfile"><p>
 <span class="textcopy">PermitRootLogin yes</span>
+</p></div>
+<p>После чего перезапускаем сервис:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo service ssh restart</span>
 </p></div><br>
 <p class="contsubs">Установка и настройка Ansible</p>
 <p>Далее все настройки будут проводиться на хосте управления. Первым делом создадим ssh-ключи:</p>
