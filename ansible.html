@@ -32,6 +32,10 @@ $ <span class="textcopy">sudo nano /etc/ssh/sshd_config</span>
 <p>Перезапускаем сервис:</p>
 <div class="messtext"><p>
 $ <span class="textcopy">sudo service ssh restart</span>
+</p></div>
+<p>Также необходимым условием является установка пакета&nbsp;&nbsp;<span class="textmark">python3</span> на каждый управляемый хост:</p>
+<div class="messtext"><p>
+$ <span class="textcopy">sudo apt -y install python3</span>
 </p></div><br>
 <p class="contsubs">Установка и настройка Ansible</p>
 <p>Далее все настройки будут проводиться на хосте управления. Первым делом создадим ssh-ключи:</p>
