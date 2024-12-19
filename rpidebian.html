@@ -21,24 +21,15 @@
 <span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
 </div><br>
 <div class="conttext"><p class="contsubs">Запись образа и базовая настройка</p>
-<p>В этой статье рассматривается подробная настройка минимального дистрибутива Debian (9, 10, 11) на одноплатном компьютере Raspberry Pi 2. Архитектура операционной системы &ndash; <span class="textmark">armv7l</span>, архитектура пакетов &ndash; <span class="textmark">armhf</span>.</p>
-<p>Дистрибутив представляет собой img-образ, который записывается на карту microSD. Скачиваем нужную версию образа системы используя утилиту&nbsp;&nbsp;<span class="textmark">wget</span>.</p>
-<p>Для Debian 9 Stretch:</p>
-<div class="messtext">
-<p>$ <span class="textcopy">wget srv_addr/storage/imgrpi/RPi2-Stretch.img</span></p>
-</div>
-<p>Для Debian 10 Buster:</p>
-<div class="messtext">
-<p>$ <span class="textcopy">wget srv_addr/storage/imgrpi/RPi2-Buster.img</span></p>
-</div>
-<p>Для Debian 11 Bullseye:</p>
+<p>В этой статье рассматривается подробная настройка минимального дистрибутива Debian 11 Bullseye на одноплатном компьютере Raspberry Pi 2. Архитектура операционной системы &ndash; <span class="textmark">armv7l</span>, архитектура пакетов &ndash; <span class="textmark">armhf</span>.</p>
+<p>Дистрибутив представляет собой img-образ, который записывается на карту microSD. Скачиваем образ системы используя утилиту&nbsp;&nbsp;<span class="textmark">wget</span>.</p>
 <div class="messtext">
 <p>$ <span class="textcopy">wget srv_addr/storage/imgrpi/RPi2-Bullseye.img</span></p>
 </div>
 <p>Далее нужно записать образ на SD-карту. Обычно SD-карта определяется в системе как&nbsp;&nbsp;<span class="textmark">mmcblk0</span>, что можно узнать при помощи команды&nbsp;&nbsp;<span class="textmark">fdisk</span>, выполненной с ключом&nbsp;&nbsp;<span class="textmark">- l</span> от имени суперпользователя.</p>
-<p>На примере дистрибутива Buster запишем образ на SD-карту:</p>
+<p>Запишем образ на SD-карту:</p>
 <div class="messtext">
-<p>$ <span class="textcopy">sudo dd if=RPi2-Buster.img of=/dev/mmcblk0 bs=1M conv=fdatasync</span></p>
+<p>$ <span class="textcopy">sudo dd if=RPi2-Bullseye.img of=/dev/mmcblk0 bs=1M conv=fdatasync</span></p>
 </div>
 <p>При первом запуске необходимо произвести настройку системы (подключив к плате монитор, клавиатуру и вставив SD-карту). Логин и пароль по умолчанию &ndash; <span class="textmark">root</span> и <span class="textmark">debian</span> соответственно.</p>
 <p>Первым делом поменяем пароль командой&nbsp;&nbsp;<span class="textmark">passwd</span>. Далее настроим локали:</p>
