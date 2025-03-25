@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">.</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p>
+</div><br>
+<div class="conttext">
+<p>В этой статье рассмтривается установка ОС OpenWRT на Raspberry Pi 4, её настройка на данной плате и установка пакета&nbsp;&nbsp;<span class="textmark">zapret</span> для обхода блокировки YouTube.</p>
+<p><span class="textmark">OpenWrt (Open Wireless router)</span> — встраиваемая операционная система, основанная на ядре Linux, предназначенная, в первую очередь, для домашних маршрутизаторов (или роутеров).</p>
+<p>Скачиваем и распаковываем образ системы:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">wget srv_addr/storage/openwrt/openwrt-23.05.5-bcm27xx-bcm2711-rpi4.zip</span><br>
+$ <span class="textcopy">unzip openwrt-23.05.5-bcm27xx-bcm2711-rpi4.zip</span></p>
+</div>
+<p>Далее, при помощи команды&nbsp;&nbsp;<span class="textmark">dd</span> записываем образ на SD-карту (узнать, как определилась карта в системе, можно командой&nbsp;&nbsp;<span class="textmark textcopy">fdisk -l</span>):</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo dd if=openwrt-23.05.5-bcm27xx-bcm2711-rpi4.img\<br>
+of=/dev/mmcblk0 bs=1M conv=fdatasync</span></p>
+</div>
+<p>И добавим запись:</p>
+<div class="messfile textcopy">
+<p>nagios ALL = NOPASSWD: /usr/sbin/megacli</p>
+</div>
+<p>Как и в прошлой статье, отредактируем файл конфигурации NRPE:</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /usr/local/nagios/etc/nrpe.cfg</span></p>
+</div>
+<p>Добавим проверку контроллера MegaRAID:</p>
+<div class="messfile textcopy">
+<p>command[check_megaraid]=/usr/local/nagios/libexec/check_megaraid_sas --sudo</p>
+</div>
+<p>И перезапустим сервис NRPE:</p>
+<div class="messtext">
+<p># <span class="textcopy">service nagios restart</span></p>
+</div>
+<p>Теперь сделаем настройку на сервере мониторинга. Откроем файл мониторинга соответствующего хоста (в прошлой статье мы решили их хранить в отдельной папке &ndash; <span class="textmark">/usr/local/nagios/etc/servers/</span>):</p>
+<div class="messtext">
+<p># <span class="textcopy">nano /usr/local/nagios/etc/servers/myserver.cfg</span></p>
+</div>
+<p>И добавим следующую секцию:</p>
+<div class="messfile textcopy">
+<p>...<br><br>
+define service {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;use&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;generic-service<br>
+&nbsp;&nbsp;&nbsp;&nbsp;host_name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;myserver<br>
+&nbsp;&nbsp;&nbsp;&nbsp;service_description&nbsp;&nbsp;&nbsp;&nbsp;RAID<br>
+&nbsp;&nbsp;&nbsp;&nbsp;check_command&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;check_nrpe!check_megaraid<br>
+}<br><br>
+...
+</div>
+<p>Ну и, как обычно, после любых изменений конфигурационных файлов следует перезапустить сервис на сервере Nagios:</p>
+<div class="messtext">
+<p>$ <span class="textcopy">sudo service nagios restart</span></p>
+</div>
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>
