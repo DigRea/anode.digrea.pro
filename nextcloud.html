@@ -69,11 +69,30 @@
 <div class="messtext"><p>
 # <span class="textcopy">systemctl restart apache2</span>
 </p></div>
-<p>Теперь даём права на папку хранилища файлов пользователя:</p>
+<p>Даём права на папку хранилища файлов пользователя:</p>
 <div class="messtext"><p>
 # <span class="textcopy">chown -R www-data:www-data /cloud</span>
 </p></div>
+<br><a name="mariadb"></a><p class="contsubs">Установка и настройка MariaDB</p>
+<p>Теперь установим сервер баз данных MariaDB:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt install mariadb-server mariadb-client</span>
+</p></div>
+<p>Активируем службу:</p>
+<div class="messtext"><p>
+# <span class="textcopy">systemctl enable --now mariadb</span>
+</p></div>
+<p>Далее проведём базовую настройку. Запустим скрипт:</p>
+<div class="messtext"><p>
+# <span class="textcopy">mysql_secure_installation</span>
+</p></div>
 <p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+
 
 <!--
 - Основной текст:
@@ -99,7 +118,7 @@ $ <span class="textcopy"></span>
 <a name=""></a><p style="font-size: 1px">&nbsp;</p>
 <p class="contsubs"></p>
 - Раздел после блока (с якорем):
-<a name=""></a><p class="contsubs"></p>
+<br><a name=""></a><p class="contsubs"></p>
 -->
 </div>
 
