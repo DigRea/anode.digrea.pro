@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <link rel="stylesheet" type="text/css" href="src/style.css">
+<title>digrea.pro</title>
+</head>
+<body>
+<div id="outblock" align="center">
+<div id="innblock">
+<div id="subblock">
+<div class="maincont">
+
+<!-- START CONTENT HERE -->
+
+<p class="conthead">Установка Nextcloud на Debian 12</p>
+<hr class="contline">
+<div class="contlead">
+<p><span class="contdate">Аннотация:&nbsp;&nbsp;</span>Установка и базовая настройка сервера Nextcloud на Debian 12 Bookworm.<br>
+<span class="contdate">Дата:&nbsp;&nbsp;</span>.&nbsp;&nbsp;<span class="contdate">Обновление:&nbsp;&nbsp;</span>.<br>
+<span class="contdate">Статус статьи:&nbsp;&nbsp;</span>pg_stat.</p></div><br>
+<div class="conttext">
+<p><span class="textmark">Nextcloud</span> &ndash; набор клиент-серверных программ для создания и использования хранилища данных. Открытая архитектура позволяет добавлять функциональность на сервер в виде приложений и позволяет пользователям полностью контролировать свои данные. Файлы Nextcloud хранятся на сервере и могут быть доступны через WebDAV, если это необходимо. Пользовательские файлы зашифровываются во время транзита (необходимо включить шифрование). Nextcloud поддерживает клиентские программы на Windows, MacOS X и GNU/Linux для синхронизации между сервером и клиентом, мобильные приложения Android и iOS для доступа к файлам.</p>
+<p>Разделим процесс установки на четыре этапа:</p>
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;подготовка ОС, установка и настройка&nbsp;&nbsp;<span class="textmark">Apache;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;установка и настройка&nbsp;&nbsp;<span class="textmark">MariaDB;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;установка и настройка&nbsp;&nbsp;<span class="textmark">PHP;</span><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&bull;&nbsp;&nbsp;&nbsp;&nbsp;установка и конфигурирование&nbsp;&nbsp;<span class="textmark">Nextcloud.</span></p>
+<p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs">Подготовка ОС, установка и настройка Apache</p>
+<p>Сохранность файлов на сервере Nextcloud, безусловно, является очень важным аспектом, поэтому стоит тщательно продумать стратегию организации хранилища данных пользователя. В качестве этого самого хранилища можно использовать <span class="textmark">RAID</span>-массив или, например, <span class="textmark">NFS</span>-ресурс. Самое главное, чтобы каталог для хранения был всегда доступен (и прописан в&nbsp;&nbsp;<span class="textmark">fstab</span>).</p>
+<p>Мы же определимся, что наш каталог для хранения файлов пользователя будет располагаться в корне и называться&nbsp;&nbsp;<span class="textmark">cloud</span>. Сейчас не важно как он подмонтирован и каков его размер, как было сказано выше, каждый сам решает каким образом организовать хранилище.</p>
+<p>Ставим Apache:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt install apache2</span>
+</p></div>
+<p>Создаём конфигурационный файл сайта:</p>
+<div class="messtext"><p>
+# <span class="textcopy">nano /etc/apache2/sites-available/cloud.conf</span>
+</p></div>
+<p>И добавляем в него следующее содержимое:</p>
+<div class="messfile"><p>
+<span class="textcopy">
+&lt;VirtualHost *:80&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ServerAdmin <b>admin@example.com</b><br>
+&nbsp;&nbsp;&nbsp;&nbsp;DocumentRoot /var/www/nextcloud<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ServerName <b>DOMAIN or IP</b><br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;Directory /var/www/nextcloud/&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Require all granted<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;AllowOverride All<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Options FollowSymLinks MultiViews<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&lt;/Directory&gt;<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ErrorLog ${APACHE_LOG_DIR}/nextcloud_error.log<br>
+&nbsp;&nbsp;&nbsp;&nbsp;CustomLog ${APACHE_LOG_DIR}/nextcloud_access.log combined<br>
+&lt;/VirtualHost&gt;
+</span>
+</p></div>
+<p>Активируем сайт:</p>
+<div class="messtext"><p>
+# <span class="textcopy">a2ensite cloud.conf</span>
+</p></div>
+<p>Включаем модули:</p>
+<div class="messtext"><p>
+# <span class="textcopy">a2enmod rewrite headers env dir mime</span>
+</p></div>
+<p>И перезапускаем Apache:</p>
+<div class="messtext"><p>
+# <span class="textcopy">systemctl restart apache2</span>
+</p></div>
+<p>Даём права на папку хранилища файлов пользователя:</p>
+<div class="messtext"><p>
+# <span class="textcopy">chown -R www-data:www-data /cloud</span>
+</p></div>
+<br><a name="mariadb"></a><p class="contsubs">Установка и настройка MariaDB</p>
+<p>Теперь установим сервер баз данных MariaDB:</p>
+<div class="messtext"><p>
+# <span class="textcopy">apt install mariadb-server mariadb-client</span>
+</p></div>
+<p>Активируем службу:</p>
+<div class="messtext"><p>
+# <span class="textcopy">systemctl enable --now mariadb</span>
+</p></div>
+<p>Далее проведём базовую настройку. Запустим скрипт:</p>
+<div class="messtext"><p>
+# <span class="textcopy">mysql_secure_installation</span>
+</p></div>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+<p></p>
+
+
+<!--
+- Основной текст:
+<p></p>
+- Выделение текста:
+<span class="textmark"></span>
+- Блок ввода с возможностью копирования:
+<div class="messtext"><p>
+$ <span class="textcopy"></span>
+</p></div>
+- Текст предупреждения:
+<p class="textwarn"></p>
+- Блок файла:
+<div class="messfile"><p>
+<span class="textcopy"></span>
+</p></div>
+- Блок вывода:
+<div class="messview"><p>
+</p></div>
+- Ссылка:
+<a class="textlink" target="_blank" href=""></a>
+- Раздел после текста (с якорем):
+<a name=""></a><p style="font-size: 1px">&nbsp;</p>
+<p class="contsubs"></p>
+- Раздел после блока (с якорем):
+<br><a name=""></a><p class="contsubs"></p>
+-->
+</div>
+
+<!-- END OF CONTENT -->
+
+</div></div></div></div>
+</body>
+</html>
