@@ -100,7 +100,7 @@ Reload privilege tables now? [Y/n] <b>y</b><br>
 </p></div>
 <p>Использовать будем следующие параметры: имя базы данных &ndash; <span class="textmark">clouddb</span>, имя пользователя &ndash; <span class="textmark">ncuser</span>, пароль &ndash; <span class="textmark">1111</span> (только для примера!).</p>
 <div class="messtext"><p>
-MariaDB [(none)]> <span class="textcopy">CREATE USER 'ncuser'@'localhost' IDENTIFIED BY '1111';</span><br>
+MariaDB [(none)]> <span class="textcopy">CREATE USER ''ncuser''@''localhost'' IDENTIFIED BY ''1111'';</span><br>
 MariaDB [(none)]> <span class="textcopy">CREATE DATABASE  DEFAULT CHARACTER SET utf8\<br> DEFAULT COLLATE utf8_general_ci;</span><br>
 MariaDB [(none)]> <span class="textcopy">GRANT ALL PRIVILEGES ON clouddb.* TO ncuser@localhost;</span><br>
 MariaDB [(none)]> <span class="textcopy">FLUSH PRIVILEGES;</span><br>
